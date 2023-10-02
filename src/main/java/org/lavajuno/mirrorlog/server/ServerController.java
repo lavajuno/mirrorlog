@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * ServerController accepts incoming connections and assigns
@@ -32,6 +33,10 @@ public class ServerController extends Thread {
         while(true) {
             try {
                 threadPool.submit(new ServerThread(socket.accept(), outputController));
+            } catch(IOException e) {
+                System.err.println("Failed to accept connection (IOException)");
+            } catch(RejectedExecutionException e) {
+                System.err.println("Failed to accept connection (Thread pool full)");
             }
         }
     }
