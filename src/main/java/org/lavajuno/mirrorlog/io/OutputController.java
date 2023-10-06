@@ -1,21 +1,36 @@
 package org.lavajuno.mirrorlog.io;
 
+import java.io.IOException;
 import java.util.concurrent.SynchronousQueue;
 
-public class OutputController {
+public class OutputController extends Thread {
     private SynchronousQueue<LogEntry> outputQueue;
 
     public OutputController() {
-        // TODO implement
+        outputQueue = new SynchronousQueue<>();
     }
 
-    public int submitEntry(String component_name, int severity, String message) {
+    public void submitEntry(String component_name, int severity, String message) throws IOException {
         try {
             outputQueue.put(new LogEntry(component_name, severity, message));
-            return 0;
         } catch(InterruptedException e) {
-            return 1;
+            throw new IOException("Failed to submit entry.");
         }
+    }
+
+    @Override
+    public void run() {
+        LogEntry entry;
+        System.out.println("OutputController: Started.");
+        try {
+            while(true) {
+                entry = outputQueue.take();
+                System.out.println(entry);
+            }
+        } catch(InterruptedException e) {
+            System.err.println("OutputController: Interrupted!");
+        }
+
 
     }
 }

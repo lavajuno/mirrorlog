@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class LogEntry {
     private static final int NAME_PAD_LENGTH = 24;
-    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SS");
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static final String SEVERITY_INFO =  " \u001B[32m[ INFO ]\u001B[0m  ";
     private static final String SEVERITY_WARN =  " \u001B[33m[ WARN ]\u001B[0m  ";
     private static final String SEVERITY_ERROR = " \u001B[31m[ ERROR ]\u001B[0m ";
