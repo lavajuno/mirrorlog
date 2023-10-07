@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import org.lavajuno.mirrorlog.server.ServerController;
-import org.lavajuno.mirrorlog.io.OutputController;
 
 /**
  * MirrorLogApplication configures and starts ServerController.
