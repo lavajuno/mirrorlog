@@ -3,26 +3,66 @@ package org.lavajuno.mirrorlog.io;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class LogEntry {
+/**
+ * LogEvent stores a single log entry and provides functionality
+ * to convert it to a string to be printed to the console or stored in a file.
+ */
+public class LogEvent {
+    /**
+     * The length that component names should be padded to
+     */
     private static final int NAME_PAD_LENGTH = 24;
-    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    /**
+     * The date and time format of log events.
+     */
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Color and header of messages with severity 0
+     */
     private static final String SEVERITY_INFO =  " \u001B[32m[ INFO ]\u001B[0m  ";
+
+    /**
+     * Color and header of messages with severity 1
+     */
     private static final String SEVERITY_WARN =  " \u001B[33m[ WARN ]\u001B[0m  ";
+
+    /**
+     * Color and header of messages with severity 2
+     */
     private static final String SEVERITY_ERROR = " \u001B[31m[ ERROR ]\u001B[0m ";
+
+    /**
+     * Color and header of messages with severity 3
+     */
     private static final String SEVERITY_FATAL = " \u001B[31m[ FATAL ]\u001B[0m ";
 
+    /**
+     * The component name for this LogEvent
+     */
     private final String component_name;
+
+    /**
+     * The message for this LogEvent
+     */
     private final String message;
+
+    /**
+     * The severity for this LogEvent
+     */
     private final int severity;
 
-    public LogEntry(String component_name, int severity, String message) {
+    /**
+     * Instantiates a LogEvent.
+     * @param component_name The component name to be logged
+     * @param severity The severity of the event
+     * @param message The message to be logged
+     */
+    public LogEvent(String component_name, int severity, String message) {
         this.component_name = component_name;
         this.severity = severity;
         this.message = message;
-    }
-
-    public LogEntry(String component_name, String message) {
-        this(component_name, 0, message);
     }
 
     @Override

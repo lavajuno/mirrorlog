@@ -1,87 +1,145 @@
 package org.lavajuno.mirrorlog.server;
 
-import org.lavajuno.mirrorlog.io.OutputController;
-
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.lavajuno.mirrorlog.io.OutputController;
+
+/**
+ * ServerThread serves a single client and queues events
+ * for the OutputController to process.
+ */
 public class ServerThread extends Thread {
+
+    /**
+     * Input buffer size (in bytes)
+     */
+    private static final int LINE_BUFFER = 2048;
+
+    /**
+     * Boot clients that don't send anything for longer than this time (milliseconds)
+     */
+    private static final int SOCKET_TIMEOUT = 600000; // 10 minutes
+
+    /**
+     * Socket to communicate with client over
+     */
     private final Socket socket;
+
+    /**
+     * The client's IP address and port
+     */
+    private final String client_address;
+
+    /**
+     * The ServerController's OutputController
+     */
     private final OutputController outputController;
+
+    /**
+     * The connected client's component name
+     */
     private String client_component_name;
 
     public ServerThread(Socket socket, OutputController outputController) {
         this.socket = socket;
         this.outputController = outputController;
         this.client_component_name = "(not specified)";
+        this.client_address = socket.getRemoteSocketAddress().toString();
     }
 
     @Override
     public void run() {
         try {
-            socket.setSoTimeout(300000);
+            outputController.submitEvent(
+                    "Log Server",
+                    0,
+                    "Client at " + client_address + " connected."
+            );
+            socket.setSoTimeout(SOCKET_TIMEOUT);
             BufferedInputStream inFromClient = new BufferedInputStream(socket.getInputStream());
             BufferedOutputStream outToClient = new BufferedOutputStream(socket.getOutputStream());
-            byte[] line_buf = new byte[8192];
+            byte[] line_buf = new byte[LINE_BUFFER];
             int line_index = 0;
-
-            // (blocking) read first byte of stream
+            // Read the first byte from the stream
             int next = inFromClient.read();
-            // loop while stream is open
+            // Loop while the stream is open
             while(next != -1) {
-                // handle presence of CR
+                // If we see a carriage return
                 if(next == 13) {
-                    if(inFromClient.read() == 10) {
-                        // decode portion of buffer we have written
+                    // Read the next byte immediately
+                    next = inFromClient.read();
+                    // If the next byte is a line feed
+                    if(next == 10) {
+                        // Decode the portion of buffer that we have written
                         String line_str = new String(
                                 Arrays.copyOf(line_buf, line_index),
                                 StandardCharsets.UTF_8
                         );
+                        // Set the severity to default (0)
                         int severity = 0;
-                        // catch @ComponentName command
-                        if(line_str.matches("^@ComponentName [A-Za-z0-9_-]{2,32}$")) {
+                        // Catch the @ComponentName command
+                        if(line_str.matches("^@ComponentName .{2,32}$")) {
                             client_component_name = line_str.substring("@ComponentName ".length());
-                        } else {
-                            // Set severity if it is included
-                            if(line_str.matches("^[0-3].*$")) { // assign severity if it is included
+                        } else { // This is a regular log event
+                            // If a severity indicator is included in the event
+                            if(line_str.matches("^[0-3].*$")) {
                                 try {
                                     severity = Integer.parseInt(line_str.substring(0, 1));
-                                    line_str = line_str.substring(1);
                                 } catch(NumberFormatException e) {
                                     System.err.println("how");
                                 }
+                                outputController.submitEvent(
+                                        client_component_name,
+                                        severity,
+                                        line_str.substring(1)
+                                );
+                            } else { // If no severity indicator is included in the event
+                                outputController.submitEvent(client_component_name, severity, line_str);
                             }
-                            // Log and return output
-                            try {
-                                outputController.submitEntry(client_component_name, severity, line_str);
-                                outToClient.write(line_str.getBytes(StandardCharsets.UTF_8));
-                                outToClient.flush();
-                            } catch(IOException e) {
-                                outToClient.write("FAIL".getBytes(StandardCharsets.UTF_8));
-                                outToClient.flush();
-                            }
+                            // Respond
+                            outToClient.write((line_str + "\r\n").getBytes(StandardCharsets.UTF_8));
+                            outToClient.flush();
                         }
-
-
-                        // reset line index
+                        // Reset the line index when we're done
                         line_index = 0;
                     }
                 } else {
                     line_buf[line_index] = (byte) next;
                     line_index++;
+                    if(line_index >= LINE_BUFFER) {
+                        throw new IOException("Bad request.");
+                    }
+
                 }
                 next = inFromClient.read();
             }
-
+            outputController.submitEvent(
+                    "Log Server",
+                    0,
+                    "Client at " + client_address + " disconnected."
+            );
         } catch(SocketException e) {
-            //TODO implement
+            outputController.submitEvent(
+                    "Log Server",
+                    2,
+                    "Client at " + client_address + " disconnected. (SocketException)"
+            );
         } catch(IOException e) {
-            //TODO implement
+            outputController.submitEvent(
+                    "Log Server",
+                    2,
+                    "Client at " + client_address + " disconnected. (IOException)"
+            );
         } catch(Exception e) {
-            System.err.println("ServerThread encountered an unhandled exception!");
+            outputController.submitEvent(
+                    "Log Server",
+                    2,
+                    "Client at " + client_address + " disconnected. (Uncaught Exception)"
+            );
             System.err.println(e.getMessage());
             System.err.println(Arrays.toString(e.getStackTrace()));
         }
