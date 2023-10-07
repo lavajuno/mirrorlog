@@ -30,7 +30,7 @@ public class ServerThread extends Thread {
     private final Socket socket;
 
     /**
-     * The client's IP address and port
+     * The client's IP address
      */
     private final String client_address;
 
@@ -48,7 +48,7 @@ public class ServerThread extends Thread {
         this.socket = socket;
         this.outputController = outputController;
         this.client_component_name = "(not specified)";
-        this.client_address = socket.getRemoteSocketAddress().toString();
+        this.client_address = socket.getInetAddress().toString();
     }
 
     @Override
