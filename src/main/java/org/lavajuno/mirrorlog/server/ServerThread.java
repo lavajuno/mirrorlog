@@ -44,6 +44,11 @@ public class ServerThread extends Thread {
      */
     private String client_component_name;
 
+    /**
+     * Instantiates a ServerThread.
+     * @param socket Socket to communicate with client over
+     * @param outputController OutputController to queue events in
+     */
     public ServerThread(Socket socket, OutputController outputController) {
         this.socket = socket;
         this.outputController = outputController;
