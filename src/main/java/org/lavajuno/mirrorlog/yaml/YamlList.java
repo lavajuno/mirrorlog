@@ -23,10 +23,11 @@ public class YamlList extends YamlElement {
     }
 
     static Vector<String> parseList(Vector<String> lines, int begin) {
+        System.out.println("Creating a list.");
         Vector<String> values = new Vector<>();
         String line;
         for(String i : lines) {
-            if(i.matches(YamlElement.ELEM_ENTRY_RGX)) {
+            if(i.matches(YamlElement.LIST_ENTRY_RGX)) {
                 line = i.split("- ")[1];
                 String head = line.substring(0, 1);
                 if(head.equals("\"") || head.equals("'")) {

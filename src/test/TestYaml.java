@@ -12,11 +12,11 @@ public class TestYaml {
     public void testYamlRead() {
         Vector<String> lines = new Vector<String>();
         lines.add("TestObject:");
-        lines.add("TOMember1: \"Test1\"");
-        lines.add("TOMember2: Test2");
-        lines.add("TOMember3:");
-        lines.add("- TOMember3E1");
-        lines.add("- TOMember2E1");
+        lines.add("  TOMember1: \"Test1\"");
+        lines.add("  TOMember2: Test2");
+        lines.add("  TOMember3:");
+        lines.add("    - TOMember3E1");
+        lines.add("    - TOMember2E1");
         try {
             YamlElement root = new YamlElement(lines);
             System.out.println(root.toString());
