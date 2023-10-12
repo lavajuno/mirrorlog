@@ -21,7 +21,7 @@ public class YamlElement {
         this.elements = elements;
     }
 
-    public YamlElement(Vector<String> lines, int begin, int end) throws InvalidPropertiesFormatException {
+    public YamlElement(Vector<String> lines, int begin, int end, int indent) throws InvalidPropertiesFormatException {
         this.key = "";
         this.elements = new Vector<YamlElement>();
         String line;
@@ -30,28 +30,14 @@ public class YamlElement {
             System.out.println("Analyzing line \"" + line + "\".");
             if(line.matches(ELEM_MULTILINE_RGX)) {
                 if(lines.get(i+1).matches(ELEM_ENTRY_RGX)) {
-                    this.key = parseKey(line);
-                    this.elements.add(new YamlElement(lines, i, end));
+                    System.out.println("Found multiline list head.");
+                    this.elements.add(new YamlList(lines, i, end));
                 } else {
-                    System.out.println("Found multiline element.");
+                    System.out.println("Found regular element.");
                     this.key = parseKey(line);
-                    this.element = new YamlElement(lines, i + 1, end);
+                    this.elements = parseElements(lines, i + 1, end, indent + 2);
                 }
                 return;
-            } else if(line.matches(ELEM_BASE_RGX)) {
-                if(line.matches(ELEM_STR_RGX)) {
-                    System.out.println("Found string element.");
-                    this.key = parseKey(line);
-                    this.element = new YamlString(line);
-                    return;
-                } else if(line.matches(ELEM_LIST_RGX)) {
-                    System.out.println("Found list element.");
-                    this.key = parseKey(line);
-                    this.element = new YamlList(line);
-                    return;
-                } else {
-                    throw new InvalidPropertiesFormatException("Bad line!");
-                }
             } else {
                 if(!line.matches(WHITESPACE_REGEX) && !line.matches(COMMENT_REGEX)) {
                     throw new InvalidPropertiesFormatException("Bad line (" + i + ").");
@@ -64,18 +50,64 @@ public class YamlElement {
     }
 
     public YamlElement(Vector<String> lines) throws InvalidPropertiesFormatException {
-        this(lines, 0, lines.size());
+        this.key = "root";
+        this.elements = parseElements(lines, 0, lines.size(), 0);
     }
 
     public String key() {
         return this.key;
     }
 
-    public YamlElement element() {
-        return this.element;
+    public Vector<YamlElement> elements() {
+        return this.elements;
     }
 
     static String parseKey(String s) { return s.stripLeading().split(":")[0]; }
+
+    static int parseIndent(String s) {
+        return s.length() - s.stripLeading().length();
+    }
+
+    static Vector<YamlElement> parseElements(Vector<String> lines,
+                                             int begin, int end, int indent) throws InvalidPropertiesFormatException {
+        Vector<YamlElement> new_elements = new Vector<YamlElement>();
+        String line;
+        for (int i = begin; i < end; i++) {
+            line = lines.get(i);
+            System.out.println("Analyzing line \"" + line + "\".");
+            if (line.matches(ELEM_MULTILINE_RGX)) {
+                if (lines.get(i + 1).matches(ELEM_ENTRY_RGX)) {
+                    if (parseIndent(line) == indent) {
+                        System.out.println("Found multi-line list element.");
+                        new_elements.add(new YamlList(lines, i, end));
+                    } else {
+                        break;
+                    }
+                } else {
+                    if (parseIndent(line) == indent) {
+                        System.out.println("Found regular element.");
+                        new_elements.add(new YamlElement(lines, i, end, indent + 2));
+                    }
+                    break;
+                }
+            } else if (line.matches(ELEM_BASE_RGX)) {
+                if (line.matches(ELEM_STR_RGX)) {
+                    System.out.println("Found string element.");
+                    new_elements.add(new YamlString(line));
+                } else if (line.matches(ELEM_LIST_RGX)) {
+                    System.out.println("Found single-line list element.");
+                    new_elements.add(new YamlList(line));
+                } else {
+                    throw new InvalidPropertiesFormatException("Bad line!");
+                }
+            } else {
+                if (!line.matches(WHITESPACE_REGEX) && !line.matches(COMMENT_REGEX)) {
+                    throw new InvalidPropertiesFormatException("Bad line (" + i + ").");
+                }
+            }
+        }
+        return new_elements;
+    }
 
     @Override
     public String toString() {
