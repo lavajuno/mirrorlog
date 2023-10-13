@@ -78,6 +78,19 @@ public class ApplicationConfig {
         }
     }
 
+    public int getPort() { return port; }
+
+    public boolean isRestricted() { return restricted; }
+
+    public Vector<InetAddress> getAllowedAddresses() { return allowed_addresses; }
+
+    public boolean isLogToFile() { return log_to_file; }
+
+    public int getFileDuration() { return file_duration; }
+
+    public int getFileHistory() { return file_history; }
+
+
     @Override
     public String toString() {
         return String.format(
