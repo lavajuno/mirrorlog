@@ -7,9 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Vector;
 
 public class LogFile {
+    private static final String LOGS_PATH = "logs/";
     private static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
 
     private final long DATE_EXPIRY;
@@ -18,11 +22,14 @@ public class LogFile {
     private final PrintWriter log_print_writer;
 
     public LogFile(ApplicationConfig application_config) throws IOException {
-        Files.createDirectories(Paths.get("logs/"));
         final String DATE_TAG = FILE_DATE_FORMAT.format(new Date());
-        final String FILE_PATH = "logs/" + DATE_TAG + ".log";
-        DATE_EXPIRY = Long.parseLong(DATE_TAG)+ application_config.getFileDuration();
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, application_config.getFileDuration());
+        DATE_EXPIRY = Long.parseLong(FILE_DATE_FORMAT.format(calendar.getTime()));
+        cleanupLogs(LOGS_PATH, application_config.getFileHistory());
 
+        Files.createDirectories(Paths.get(LOGS_PATH));
+        final String FILE_PATH = LOGS_PATH + DATE_TAG + ".log";
         log_file_writer = new FileWriter(FILE_PATH, StandardCharsets.UTF_8, true);
         log_print_writer = new PrintWriter(log_file_writer, true);
     }
@@ -44,5 +51,27 @@ public class LogFile {
 
     public boolean isExpired() {
         return DATE_EXPIRY < Long.parseLong(FILE_DATE_FORMAT.format(new Date()));
+    }
+
+    public void cleanupLogs(String path, int max_logs) {
+        File[] path_contents = new File(path).listFiles();
+        if(path_contents == null || path_contents.length == 0) { return; }
+        Vector<String> path_datetags = new Vector<>();
+        for(File i : path_contents) {
+            if(i.isFile()) {
+                path_datetags.add(i.getName().split("\\.", 2)[0]);
+            }
+        }
+        int n_extra_logs = path_datetags.size() - max_logs;
+        if(n_extra_logs > 0) {
+            Collections.sort(path_datetags);
+            for(int i = 0; i < n_extra_logs; i++) {
+                try {
+                    Files.delete(Paths.get(LOGS_PATH + path_datetags.get(i) + ".log"));
+                } catch(IOException e) {
+                    System.err.println("Failed to delete old log \"" + path_datetags.get(i) + ".log\".");
+                }
+            }
+        }
     }
 }
