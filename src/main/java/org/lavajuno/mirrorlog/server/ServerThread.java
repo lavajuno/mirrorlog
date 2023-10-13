@@ -146,7 +146,17 @@ public class ServerThread extends Thread {
                     "Client at " + client_address + " disconnected. (Uncaught Exception)"
             );
             System.err.println(e.getMessage());
-            System.err.println(Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    @Override
+    public void interrupt() {
+        try {
+            System.out.println("Connection to " + socket.getInetAddress() + " terminated.");
+            this.socket.close();
+        } catch(IOException e) {
+            System.err.println("Failed to close socket.");
+        }
+
     }
 }

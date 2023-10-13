@@ -6,6 +6,13 @@ revision: 0
 
 # Configuration for the log server itself
 server:
+  # How many connections should the server be able to simultaneously handle?
+  # Having a lot of threads will slightly increase resource usage, but
+  # having too few threads will cause connections to be rejected.
+  # -- Example --
+  # threads: 32
+  threads: 32
+
   # Which port should the server listen on? (integer)
   # This can be overridden by passing a different port
   # as an argument when starting the software.

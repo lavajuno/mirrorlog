@@ -5,6 +5,7 @@ import org.lavajuno.mirrorlog.io.OutputController;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -16,9 +17,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class ServerController extends Thread {
     /**
-     * The number of simultaneous connections the server will handle before refusing additional ones
+     * Path to the program configuration file
      */
-    private static final int THREAD_POOL_SIZE = 32;
+    private static final String CONFIG_FILE_PATH = "mirrorlog.conf.yml";
 
     /**
      * The socket that the server listens on
@@ -31,26 +32,37 @@ public class ServerController extends Thread {
     private final ExecutorService threadPool;
 
     /**
+     * This ServerController's application configuration
+     */
+    final ApplicationConfig applicationConfig;
+
+    /**
      * This ServerController's OutputController
      */
     final OutputController outputController;
 
-    final ApplicationConfig applicationConfig;
 
     /**
      * Instantiates a ServerController.
      * @param port The port to open the server on
-     * @throws IllegalArgumentException if the port is invalid
      * @throws IOException if the socket cannot be created
      */
-    public ServerController(int port) throws IllegalArgumentException, IOException {
-        if(port < 1024 || port > 65535) {
-            throw new IllegalArgumentException("ServerController: Invalid port.");
-        }
-        outputController = new OutputController();
-        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+    public ServerController(int port) throws IOException {
+        applicationConfig = new ApplicationConfig(CONFIG_FILE_PATH);
+        outputController = new OutputController(applicationConfig);
+        threadPool = Executors.newFixedThreadPool(applicationConfig.getThreads());
         socket = new ServerSocket(port);
-        applicationConfig = new ApplicationConfig("mirrorlog.conf.yml");
+    }
+
+    /**
+     * Instantiates a ServerController.
+     * @throws IOException if the socket cannot be created
+     */
+    public ServerController() throws IOException {
+        applicationConfig = new ApplicationConfig(CONFIG_FILE_PATH);
+        outputController = new OutputController(applicationConfig);
+        threadPool = Executors.newFixedThreadPool(applicationConfig.getThreads());
+        socket = new ServerSocket(applicationConfig.getPort());
     }
 
     @Override
@@ -66,18 +78,20 @@ public class ServerController extends Thread {
             try {
                 threadPool.submit(new ServerThread(socket.accept(), outputController));
             } catch(IOException e) {
-                outputController.submitEvent(
-                        "Log Server",
-                        2,
-                        "Failed to accept a connection. (IOException)"
-                );
+                if (socket.isClosed()) { return; }
+                System.err.println("Failed to accept a connection. (IOException)");
             } catch(RejectedExecutionException e) {
-                outputController.submitEvent(
-                        "Log Server",
-                        1,
-                        "Failed to accept a connection. (Thread pool is full!)"
-                );
+                System.err.println("Failed to accept a connection. (Thread pool is full)");
             }
+        }
+    }
+
+    @Override
+    public void interrupt() {
+        try {
+            socket.close();
+        } catch(IOException e) {
+            System.err.println("Failed to close server socket. (IOException)");
         }
     }
 
@@ -86,17 +100,21 @@ public class ServerController extends Thread {
      * It first tries to do this gracefully, but if it cannot, it will force them to stop.
      */
     public void close() {
-        System.out.println("Shutting down thread pool...");
-        threadPool.shutdown();
-        try {
-            if(!threadPool.awaitTermination(3, TimeUnit.SECONDS)) {
-                System.err.println("Thread pool still has active connections. Shutting it down now.");
-                threadPool.shutdownNow();
-            }
-        } catch(InterruptedException e) {
-            System.err.println("Interrupted while shutting down thread pool. Stopping now.");
-            threadPool.shutdownNow();
-        }
+        System.out.println("Sending shutdown signal to thread pool...");
+        threadPool.shutdownNow();
+        System.out.println("Sending shutdown signal to output controller...");
         outputController.interrupt();
+        try {
+            outputController.join(1000);
+        } catch(InterruptedException e) {
+            System.err.println("Interrupted while shutting down. Skipping timeout.");
+        }
+        if(outputController.isAlive()) {
+            System.out.println("Waiting on output controller to shut down...");
+        }
+        if(!threadPool.isTerminated()) {
+            System.out.println("Waiting on thread pool to shut down...");
+        }
+
     }
 }

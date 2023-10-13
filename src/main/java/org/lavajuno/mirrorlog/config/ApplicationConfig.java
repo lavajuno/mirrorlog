@@ -12,6 +12,7 @@ import java.util.Vector;
 
 @SuppressWarnings("unused")
 public class ApplicationConfig {
+    private final int threads;
     private final int port;
     private final int revision;
     private final boolean restricted;
@@ -26,6 +27,7 @@ public class ApplicationConfig {
         final YamlValue config_revision = (YamlValue) config_root.getElement("revision");
 
         final YamlElement config_server = config_root.getElement("server");
+        final YamlValue config_threads = (YamlValue) config_server.getElement("threads");
         final YamlValue config_port = (YamlValue) config_server.getElement("port");
         final YamlValue config_restricted = (YamlValue) config_server.getElement("restricted");
         final YamlList config_addresses = (YamlList) config_server.getElement("allowed_addresses");
@@ -43,13 +45,20 @@ public class ApplicationConfig {
         }
 
         try {
+            this.threads = Integer.parseInt(config_threads.CONTENTS);
+        } catch(NumberFormatException e) {
+            System.err.println("Illegal value for key \"threads\".");
+            throw new IOException("Illegal value for key \"threads\".");
+        }
+
+        try {
             this.port = Integer.parseInt(config_port.CONTENTS);
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"port\".");
             throw new IOException("Illegal value for key \"port\".");
         }
 
-        this.restricted = Boolean.parseBoolean(config_port.CONTENTS);
+        this.restricted = Boolean.parseBoolean(config_restricted.CONTENTS);
 
         allowed_addresses = new Vector<>();
         try {
@@ -76,7 +85,10 @@ public class ApplicationConfig {
             System.err.println("Illegal value for key \"file_history\".");
             throw new IOException("Illegal value for key \"file_history\".");
         }
+        System.out.println("Application configuration created: \n" + this);
     }
+
+    public int getThreads() { return threads; }
 
     public int getPort() { return port; }
 
@@ -95,17 +107,18 @@ public class ApplicationConfig {
     public String toString() {
         return String.format(
             """
-            ApplicationConfig {
+            {
                 Revision: %s
+                Threads: %s
                 Port: %s
                 Restricted: %s
                 Allowed addresses: %s
                 Log to file: %s
                 File duration: %s
                 File history: %s
-            }
-            """,
-            String.valueOf(revision),
+            }""",
+            revision,
+            threads,
             port,
             restricted,
             allowed_addresses,

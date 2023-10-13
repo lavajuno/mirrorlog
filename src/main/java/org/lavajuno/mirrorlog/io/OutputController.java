@@ -1,5 +1,8 @@
 package org.lavajuno.mirrorlog.io;
 
+import org.lavajuno.mirrorlog.config.ApplicationConfig;
+
+import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -13,11 +16,18 @@ public class OutputController extends Thread {
      */
     private final BlockingQueue<LogEvent> outputQueue;
 
+    private final ApplicationConfig applicationConfig;
+
+    private LogFile logFile;
+
     /**
      * Instantiates an OutputController.
      */
-    public OutputController() {
+    public OutputController(ApplicationConfig applicationConfig) throws IOException {
+        this.applicationConfig = applicationConfig;
         outputQueue = new LinkedBlockingQueue<>();
+        logFile = new LogFile(applicationConfig);
+
     }
 
     /**
@@ -36,20 +46,25 @@ public class OutputController extends Thread {
      */
     @Override
     public void run() {
-        LogEvent entry;
-        this.submitEvent(
-                "Log Server",
-                0,
-                "Started output controller."
-        );
+        LogEvent event;
         try {
             while(true) {
-                entry = outputQueue.take();
-                System.out.println(entry);
+                event = outputQueue.take();
+                if(logFile.isExpired()) {
+                    logFile.close();
+                    try {
+                        logFile = new LogFile(applicationConfig);
+                    } catch(IOException e) {
+                        System.err.println("Failed to create new log file!");
+                    }
+
+                }
+                System.out.println(event.toPrettyString());
+                logFile.print(event);
             }
         } catch(InterruptedException e) {
-            System.out.println("Output controller: Stopping now.");
+            System.out.println("Flushing output buffer to log file...");
+            logFile.close();
         }
-
     }
 }
