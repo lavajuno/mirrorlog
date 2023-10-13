@@ -1,0 +1,45 @@
+# mirrorlog.conf.yml
+# Configuration file for MirrorLog
+
+# Config file format revision (do not change this!)
+revision: 0
+
+# Configuration for the log server itself
+server:
+  # Which port should the server listen on? (integer)
+  # This can be overridden by passing a different port
+  # as an argument when starting the software.
+  # -- Example --
+  # port: 1234
+  port: 4357
+
+  # Should the server ignore requests from unknown addresses? (true/false)
+  # -- Example --
+  # restricted: true
+  restricted: true
+
+  # If 'restricted' is true, which addresses should we allow connections from? (list)
+  # -- Example --
+  # allowed_addresses:
+  #   - 127.0.0.1
+  allowed_addresses:
+    - 127.0.0.1
+
+# Configuration for log output
+output:
+  # Should the server log to files as well as the console? (true/false)
+  # -- Example --
+  # log_to_file: true
+  log_to_file: true
+
+  # How often (in hours) should the server create a new log file? (number)
+  # -- Example --
+  # file_duration: 24
+  file_duration: 24
+
+  # How many old log files should the server retain?
+  # -- Example --
+  # file_history: 30
+  file_history: 30
+
+# That's it! You're done setting up MirrorLog.

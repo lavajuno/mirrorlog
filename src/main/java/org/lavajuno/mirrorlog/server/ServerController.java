@@ -50,7 +50,7 @@ public class ServerController extends Thread {
         outputController = new OutputController();
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         socket = new ServerSocket(port);
-        applicationConfig = new ApplicationConfig();
+        applicationConfig = new ApplicationConfig("mirrorlog.conf.yml");
     }
 
     @Override
