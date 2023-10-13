@@ -7,51 +7,42 @@ import java.util.Vector;
 public class YamlList extends YamlElement {
     Vector<String> contents;
 
-    public YamlList(String key, Vector<String> contents) {
-        super(key, null);
-        this.contents = contents;
-    }
-
-    public YamlList(String line) {
-        super(YamlElement.parseKey(line), null);
-        this.contents = parseList(line);
-    }
-
     public YamlList(Vector<String> lines, int begin, int end) {
         super(YamlElement.parseKey(lines.get(begin)), null);
-        this.contents = parseList(lines, begin + 1);
+        this.contents = parseList(lines, begin + 1, end);
     }
 
-    static Vector<String> parseList(Vector<String> lines, int begin) {
-        System.out.println("Creating a list.");
+    static Vector<String> parseList(Vector<String> lines, int begin, int end) {
         Vector<String> values = new Vector<>();
         String line;
-        for(String i : lines) {
-            if(i.matches(YamlElement.LIST_ENTRY_RGX)) {
-                line = i.split("- ")[1];
-                String head = line.substring(0, 1);
+        String value;
+        /* Iterate over each line */
+        for(int i = begin; i < end; i++) {
+            line = lines.get(i); /* The current line */
+            /* If the line is a valid list entry, record it */
+            if(line.matches(YamlElement.LIST_ENTRY_RGX)) {
+                value = line.split("- ")[1];
+                String head = value.substring(0, 1);
+                /* Trim quotes if they exist */
                 if(head.equals("\"") || head.equals("'")) {
-                    values.add(line.substring(1, line.length() - 1));
+                    values.add(value.substring(1, value.length() - 1));
                 } else {
-                    values.add(line);
+                    values.add(value);
                 }
             } else {
+                /* Stop reading and return once we reach the end of the list */
                 break;
             }
         }
         return values;
     }
 
-    static Vector<String> parseList(String line) {
-        return new Vector<String>();
-    }
-
     public Vector<String> contents() {
-        return this.contents();
+        return this.contents;
     }
 
     @Override
     public String toString() {
-        return "YamlList: Key-\"" + this.key + "\" Contents-\"" + this.contents.toString() + "\".\n";
+        return "YamlList -- Key: \"" + this.key + "\", Contents: \"" + this.contents.toString() + "\"\n";
     }
 }

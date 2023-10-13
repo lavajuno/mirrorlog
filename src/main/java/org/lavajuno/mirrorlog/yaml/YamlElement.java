@@ -3,16 +3,14 @@ package org.lavajuno.mirrorlog.yaml;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Vector;
 
-@SuppressWarnings("unused")
 public class YamlElement {
     static final String IGNORE_RGX = "^(#.*)|( *)$";
     static final String ELEMENT_RGX =  "^ *[A-Za-z0-9_-]{1,64}: *$";
     static final String STRING_RGX = "^ *[A-Za-z0-9_-]{1,64}: +\"?.{1,512}\"?$";
-    static final String LIST_RGX = "^ *[A-Za-z0-9_-]{1,64}: +\\[.{1,512}\\]$";
     static final String LIST_ENTRY_RGX = "^ *- *.{1,512}$";
 
     enum LINE_MATCHES {
-        IGNORE, ELEMENT, STRING, LIST, NONE
+        IGNORE, ELEMENT, STRING, NONE
     }
 
     String key;
@@ -25,7 +23,7 @@ public class YamlElement {
 
     public YamlElement(Vector<String> lines, int begin, int end, int indent) throws InvalidPropertiesFormatException {
         this.key = parseKey(lines.get(begin));
-        this.elements = parseElements(lines, begin + 1, end, indent + 2);
+        this.elements = parseElements(lines, begin + 1, end, indent);
     }
 
     public YamlElement(Vector<String> lines) throws InvalidPropertiesFormatException {
@@ -49,48 +47,46 @@ public class YamlElement {
 
     static Vector<YamlElement> parseElements(Vector<String> lines,
                                              int begin, int end, int indent) throws InvalidPropertiesFormatException {
-        Vector<YamlElement> new_elements = new Vector<YamlElement>();
+        Vector<YamlElement> new_elements = new Vector<>();
         String line;
         int line_indent;
         LINE_MATCHES line_match;
-        for (int i = begin; i < end; i++) {
-            line = lines.get(i);
-            line_indent = parseIndent(line);
-            line_match = matchLine(line);
-            System.out.println("Analyzing line \"" + line + "\".");
 
-            // ignore comment or blank lines
+        /* Iterate over each line */
+        for (int i = begin; i < end; i++) {
+            line = lines.get(i);             /* Current line */
+            line_indent = parseIndent(line); /* How indented this line is */
+            line_match = matchLine(line);    /* This line's matched type */
+
             if(line_match != LINE_MATCHES.IGNORE) {
-                // if indent is consistent
+                /* Handle only lines in our indented block */
                 if(line_indent == indent) {
-                    switch(matchLine(line)) {
-                        case ELEMENT: // element with 0 or more children
-                            System.out.println("Found regular element.");
-                            new_elements.add(new YamlElement(lines, i, end, indent + 2));
-                            break;
-                        case STRING: // element with a string
-                            System.out.println("Found string element.");
-                            new_elements.add(new YamlString(line));
-                            break;
-                        case LIST: // element with either a single or multi line list
+                    switch(line_match) {
+                        case ELEMENT:
                             if (lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
-                                System.out.println("Found multi-line list element.");
+                                /* If the line is the head of a list */
                                 new_elements.add(new YamlList(lines, i, end));
                             } else {
-                                System.out.println("Found single-line list element.");
-                                new_elements.add(new YamlList(line));
+                                /* If the line is an element with 0 or more children */
+                                new_elements.add(new YamlElement(lines, i, end, indent + 2));
                             }
                             break;
-                        case NONE: // no match
-                            System.err.println("vv  Invalid line  vv");
+                        case STRING:
+                            /* If the line is an element with just a string */
+                            new_elements.add(new YamlString(line));
+                            break;
+                        case NONE:
+                            /* If no match was found */
+                            System.err.println("vv  Invalid YAML:  vv");
                             System.err.println(line);
-                            System.err.println("^^  Invalid line  ^^");
-                            throw new InvalidPropertiesFormatException("Bad line (" + i + ").");
+                            System.err.println("^^  -------------  ^^");
+                            throw new InvalidPropertiesFormatException("Invalid YAML. (Line " + i + ").");
                     }
                 } else if(line_indent < indent) {
+                    /* Stop reading once we reach the end of our indented block. */
                     break;
                 }
-                // just skip this line if it's a higher indent
+                /* If the line's indent is greater, just skip reading it. */
             }
         }
         return new_elements;
@@ -103,8 +99,6 @@ public class YamlElement {
             return LINE_MATCHES.ELEMENT;
         } else if(line.matches(STRING_RGX)) {
             return LINE_MATCHES.STRING;
-        } else if(line.matches(LIST_RGX)) {
-            return LINE_MATCHES.LIST;
         } else {
             return LINE_MATCHES.NONE;
         }
@@ -112,6 +106,12 @@ public class YamlElement {
 
     @Override
     public String toString() {
-        return "YamlElement: Key-\"" + this.key + "\" Elements{\n" + this.elements.toString() + "\n}";
+        StringBuilder sb = new StringBuilder();
+        sb.append("YamlElement -- Key: \"").append(this.key).append("\", Elements: \n{\n");
+        for(YamlElement i : this.elements) {
+            sb.append(i.toString());
+        }
+        sb.append("}\n");
+        return sb.toString();
     }
 }
