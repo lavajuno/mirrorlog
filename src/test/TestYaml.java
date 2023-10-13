@@ -17,6 +17,8 @@ public class TestYaml {
         lines.add("  TOMember3:");
         lines.add("    - TOMember3E1");
         lines.add("    - TOMember2E1");
+        lines.add("  TOMember4: Test3");
+        lines.add("TestObject2:");
         try {
             YamlElement root = new YamlElement(lines);
             System.out.println(root.toString());

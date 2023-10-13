@@ -3,16 +3,33 @@ package org.lavajuno.mirrorlog.yaml;
 
 import java.util.Vector;
 
+/**
+ * YamlList is a YamlElement that contains a list of Strings.
+ * A YamlList never has children (YamlList.ELEMENTS will always be null).
+ */
 //@SuppressWarnings("unused")
 public class YamlList extends YamlElement {
-    Vector<String> contents;
+    public final Vector<String> CONTENTS;
 
-    public YamlList(Vector<String> lines, int begin, int end) {
+    /**
+     * Constructs a YamlList.
+     * @param lines Lines of YAML to parse
+     * @param begin Index to start parsing at
+     * @param end Index to stop parsing at
+     */
+    YamlList(Vector<String> lines, int begin, int end) {
         super(YamlElement.parseKey(lines.get(begin)), null);
-        this.contents = parseList(lines, begin + 1, end);
+        this.CONTENTS = parseList(lines, begin + 1, end);
     }
 
-    static Vector<String> parseList(Vector<String> lines, int begin, int end) {
+    /**
+     * Parses this YamlList's items
+     * @param lines Lines of YAML to parse
+     * @param begin Index to start parsing at
+     * @param end Index to stop parsing at
+     * @return This YamlList's items
+     */
+    private static Vector<String> parseList(Vector<String> lines, int begin, int end) {
         Vector<String> values = new Vector<>();
         String line;
         String value;
@@ -37,12 +54,8 @@ public class YamlList extends YamlElement {
         return values;
     }
 
-    public Vector<String> contents() {
-        return this.contents;
-    }
-
     @Override
     public String toString() {
-        return "YamlList -- Key: \"" + this.key + "\", Contents: \"" + this.contents.toString() + "\"\n";
+        return "YamlList -- Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS.toString() + "\"\n";
     }
 }
