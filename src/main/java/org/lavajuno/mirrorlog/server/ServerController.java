@@ -1,5 +1,6 @@
 package org.lavajuno.mirrorlog.server;
 
+import org.lavajuno.mirrorlog.config.ApplicationConfig;
 import org.lavajuno.mirrorlog.io.OutputController;
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ public class ServerController extends Thread {
      */
     final OutputController outputController;
 
+    final ApplicationConfig applicationConfig;
+
     /**
      * Instantiates a ServerController.
      * @param port The port to open the server on
@@ -47,6 +50,7 @@ public class ServerController extends Thread {
         outputController = new OutputController();
         threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         socket = new ServerSocket(port);
+        applicationConfig = new ApplicationConfig();
     }
 
     @Override
