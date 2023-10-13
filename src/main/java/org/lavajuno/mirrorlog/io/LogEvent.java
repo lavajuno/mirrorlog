@@ -28,7 +28,7 @@ public class LogEvent {
      * Color and header of messages with severity 1
      */
     private static final String SEVERITY_WARN_PRETTY = " \u001B[33m[ WARN ]\u001B[0m  ";
-    private static final String SEVERITY_WARN = " [WARN]  ";
+    private static final String SEVERITY_WARN = " [ WARN ]  ";
 
     /**
      * Color and header of messages with severity 2
