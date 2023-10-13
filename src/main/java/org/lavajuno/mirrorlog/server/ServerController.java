@@ -5,11 +5,9 @@ import org.lavajuno.mirrorlog.io.OutputController;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ServerController accepts incoming connections and assigns
@@ -34,7 +32,7 @@ public class ServerController extends Thread {
     /**
      * This ServerController's application configuration
      */
-    final ApplicationConfig applicationConfig;
+    final ApplicationConfig application_config;
 
     /**
      * This ServerController's OutputController
@@ -48,9 +46,9 @@ public class ServerController extends Thread {
      * @throws IOException if the socket cannot be created
      */
     public ServerController(int port) throws IOException {
-        applicationConfig = new ApplicationConfig(CONFIG_FILE_PATH);
-        outputController = new OutputController(applicationConfig);
-        threadPool = Executors.newFixedThreadPool(applicationConfig.getThreads());
+        application_config = new ApplicationConfig(CONFIG_FILE_PATH);
+        outputController = new OutputController(application_config);
+        threadPool = Executors.newFixedThreadPool(application_config.getThreads());
         socket = new ServerSocket(port);
     }
 
@@ -59,10 +57,10 @@ public class ServerController extends Thread {
      * @throws IOException if the socket cannot be created
      */
     public ServerController() throws IOException {
-        applicationConfig = new ApplicationConfig(CONFIG_FILE_PATH);
-        outputController = new OutputController(applicationConfig);
-        threadPool = Executors.newFixedThreadPool(applicationConfig.getThreads());
-        socket = new ServerSocket(applicationConfig.getPort());
+        application_config = new ApplicationConfig(CONFIG_FILE_PATH);
+        outputController = new OutputController(application_config);
+        threadPool = Executors.newFixedThreadPool(application_config.getThreads());
+        socket = new ServerSocket(application_config.getPort());
     }
 
     @Override

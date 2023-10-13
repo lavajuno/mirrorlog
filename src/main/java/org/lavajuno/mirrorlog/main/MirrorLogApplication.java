@@ -16,21 +16,21 @@ public class MirrorLogApplication {
      * @param args Unused
      */
     public static void main(String[] args) {
-        ServerController serverController;
+        ServerController server_controller;
 
         System.out.println("Starting MirrorLog server...");
         try {
-            serverController = new ServerController();
-            serverController.start();
+            server_controller = new ServerController();
+            server_controller.start();
             Scanner scanner = new Scanner(System.in);
             while(true) {
                 System.out.println("----- Input 't' to terminate. -----");
                 if(scanner.nextLine().equalsIgnoreCase("t")) {
                     System.out.println("Shutting down MirrorLog server...");
-                    serverController.interrupt();
-                    serverController.close();
+                    server_controller.interrupt();
+                    server_controller.close();
                     try {
-                        serverController.join(10000);
+                        server_controller.join(10000);
                     } catch(InterruptedException e) {
                         System.err.println("Interrupted whilst shutting down. Skipping timeout...");
                     }
