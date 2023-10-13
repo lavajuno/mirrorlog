@@ -77,4 +77,28 @@ public class ApplicationConfig {
             throw new IOException("Illegal value for key \"file_history\".");
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+            """
+            ApplicationConfig {
+                Revision: %s
+                Port: %s
+                Restricted: %s
+                Allowed addresses: %s
+                Log to file: %s
+                File duration: %s
+                File history: %s
+            }
+            """,
+            String.valueOf(revision),
+            port,
+            restricted,
+            allowed_addresses,
+            log_to_file,
+            file_duration,
+            file_history
+        );
+    }
 }
