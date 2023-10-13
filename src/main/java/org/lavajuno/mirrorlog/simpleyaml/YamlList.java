@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.yaml;
+package org.lavajuno.mirrorlog.simpleyaml;
 
 
 import java.util.Vector;
@@ -35,10 +35,10 @@ public class YamlList extends YamlElement {
         String value;
         /* Iterate over each line */
         for(int i = begin; i < end; i++) {
-            line = lines.get(i); /* The current line */
+            line = lines.get(i);
             /* If the line is a valid list entry, record it */
             if(line.matches(YamlElement.LIST_ENTRY_RGX)) {
-                value = line.split("- ")[1];
+                value = line.split("- ", 2)[1];
                 String head = value.substring(0, 1);
                 /* Trim quotes if they exist */
                 if(head.equals("\"") || head.equals("'")) {
@@ -46,9 +46,13 @@ public class YamlList extends YamlElement {
                 } else {
                     values.add(value);
                 }
-            } else {
-                /* Stop reading and return once we reach the end of the list */
-                break;
+            } else { /* If the line is NOT a valid list entry */
+                if(!line.matches(IGNORE_RGX)) {
+                    /* If the line is not a list entry or blank/comment,
+                       then we have reached the end of the list. */
+                    break;
+                }
+                /* Skip blank/comment lines */
             }
         }
         return values;
@@ -56,6 +60,6 @@ public class YamlList extends YamlElement {
 
     @Override
     public String toString() {
-        return "YamlList -- Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS.toString() + "\"\n";
+        return "YamlList - Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS.toString() + "\"\n";
     }
 }

@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.yaml;
+package org.lavajuno.mirrorlog.simpleyaml;
 
 /**
  * YamlValue is a YamlElement that contains a String.
@@ -24,7 +24,7 @@ public class YamlValue extends YamlElement {
      * @return The value of the YAML element in the given line
      */
     private static String parseValue(String line) {
-        String value = line.split(": ")[1];
+        String value = line.split(": ", 2)[1];
         String head = value.substring(0, 1);
         /* Trim quotes if they exist */
         if(head.equals("\"") || head.equals("'")) {
@@ -36,6 +36,6 @@ public class YamlValue extends YamlElement {
 
     @Override
     public String toString() {
-        return "YamlValue -- Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS + "\"\n";
+        return "YamlValue - Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS + "\"\n";
     }
 }

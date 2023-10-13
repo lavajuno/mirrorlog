@@ -1,11 +1,11 @@
-package org.lavajuno.mirrorlog.yaml;
+package org.lavajuno.mirrorlog.simpleyaml;
 
 import java.util.InvalidPropertiesFormatException;
 import java.util.Vector;
 
 /**
  * YamlElement represents a single YAML element.
- * This can be either an element containing 1 or more elements,
+ * This can be either an element containing 0 or more children,
  * an element containing a value, or an element containing a list of values.
  * It is constructed with a vector of lines, and parses them by
  * recursively constructing new YamlElements.
@@ -21,7 +21,7 @@ public class YamlElement {
     /**
      * Regex that matches lines to ignore (blank or commented)
      */
-    static final String IGNORE_RGX = "^(#.*)|( *)$";
+    static final String IGNORE_RGX = "^( *#.*)|( *)$";
 
     /**
      * Regex that matches lines containing an element or list head (ex. "ElementName: ")
@@ -131,10 +131,10 @@ public class YamlElement {
                             break;
                         case NONE:
                             /* If no match was found */
-                            System.err.println("vv  Invalid YAML:  vv");
+                            System.err.println("vv  Syntax error on line:  vv");
                             System.err.println(line);
-                            System.err.println("^^  -------------  ^^");
-                            throw new InvalidPropertiesFormatException("Invalid YAML. (Line " + i + ").");
+                            System.err.println("^^  ---------------------  ^^");
+                            throw new InvalidPropertiesFormatException("Syntax error on line " + i + ".");
                     }
                 } else if(line_indent < indent) {
                     /* Stop reading once we reach the end of our indented block. */
@@ -153,7 +153,7 @@ public class YamlElement {
      * @param line The line to parse
      * @return The key contained in this line
      */
-    static String parseKey(String line) { return line.stripLeading().split(":")[0]; }
+    static String parseKey(String line) { return line.stripLeading().split(":", 2)[0]; }
 
     /**
      * Parses a line to return the number of spaces it is indented by.
@@ -184,11 +184,11 @@ public class YamlElement {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("YamlElement -- Key: \"").append(this.KEY).append("\", Elements: {\n");
+        sb.append("YamlElement - \"").append(this.KEY).append("\": {\n");
         for(YamlElement i : this.ELEMENTS) {
             sb.append(i.toString());
         }
-        sb.append("}\n");
+        sb.append("} /\"").append(KEY).append("\"\n");
         return sb.toString();
     }
 }
