@@ -1,13 +1,15 @@
 package src.test;
 
 import org.junit.jupiter.api.Test;
-import org.lavajuno.mirrorlog.simpleyaml.YamlElement;
+import org.lavajuno.mirrorlog.config.ApplicationConfig;
+import org.lavajuno.mirrorlog.yaml.YamlElement;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Vector;
 
-public class TestYaml {
+public class TestConfig {
     @Test
     public void testYamlRead() {
         Vector<String> lines = new Vector<String>();
@@ -26,7 +28,17 @@ public class TestYaml {
             YamlElement root = new YamlElement(lines);
             System.out.println(root.toString());
         } catch(InvalidPropertiesFormatException e) {
-            System.err.println(Arrays.toString(e.getStackTrace()));
+            System.err.println(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfigRead() {
+        try {
+            ApplicationConfig ac = new ApplicationConfig("mirrorlog.conf.yml");
+            System.out.println(ac.toString());
+        } catch(IOException e) {
+            System.err.println(e.getMessage());
         }
 
     }

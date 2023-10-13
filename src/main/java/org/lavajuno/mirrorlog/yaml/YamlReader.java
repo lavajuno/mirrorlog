@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.simpleyaml;
+package org.lavajuno.mirrorlog.yaml;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.util.Vector;
 
 /**
- * SimpleYamlReader parses YAML from a file into YamlElement(s).
+ * YamlReader parses YAML from a file into YamlElement(s).
  * Please consider that the parser is very small and only supports basic features of YAML.
  * Limitations:
  *   1- Lists must be in multiple-line form, and can only contain values.
@@ -37,7 +37,7 @@ import java.util.Vector;
  *       MyElement: # This is what MyElement does.
  */
 @SuppressWarnings("unused")
-public class SimpleYamlReader {
+public class YamlReader {
 
     /**
      * Parses YAML from a file into YamlElement(s).

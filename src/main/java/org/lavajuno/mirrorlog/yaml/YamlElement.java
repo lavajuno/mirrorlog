@@ -1,5 +1,6 @@
-package org.lavajuno.mirrorlog.simpleyaml;
+package org.lavajuno.mirrorlog.yaml;
 
+import java.io.IOException;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Vector;
 
@@ -88,6 +89,18 @@ public class YamlElement {
      */
     public YamlElement(Vector<String> lines) throws InvalidPropertiesFormatException {
         this("root", parseElements(lines, 0, lines.size(), 0));
+    }
+
+    /**
+     * Returns the first element with a given key found in this YamlElement's children.
+     * @param key The key to match
+     * @return The first element found with the given key (or null if none are found)
+     */
+    public YamlElement getElement(String key) throws IOException {
+        for(YamlElement i : ELEMENTS) {
+            if(i.KEY.equals(key)) { return i; }
+        }
+        throw new IOException("Key \"" + key + "\" not found.");
     }
 
     /**

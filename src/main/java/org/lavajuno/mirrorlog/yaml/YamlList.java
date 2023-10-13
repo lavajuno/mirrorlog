@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.simpleyaml;
+package org.lavajuno.mirrorlog.yaml;
 
 
 import java.util.Vector;
