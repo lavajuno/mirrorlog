@@ -1,7 +1,7 @@
 package src.test;
 
 import org.junit.jupiter.api.Test;
-import org.lavajuno.mirrorlog.simpleyaml.YamlElement;
+import org.lavajuno.mirrorlog.yaml.YamlElement;
 
 import java.util.Arrays;
 import java.util.InvalidPropertiesFormatException;

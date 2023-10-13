@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.simpleyaml;
+package org.lavajuno.mirrorlog.yaml;
 
 /**
  * YamlValue is a YamlElement that contains a String.
