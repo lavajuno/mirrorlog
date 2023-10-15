@@ -20,6 +20,12 @@ server:
   # port: 1234
   port: 4357
 
+  # How long should the server wait before disconnecting inactive clients? (integer)
+  # This duration is measured in milliseconds. (15 min is 900000 ms)
+  # Note that if a client disconnects or a socket error occurs, the connection
+  # will be automatically terminated, so this only handles inactive clients.
+  timeout: 1800000
+
   # Should the server ignore requests from unknown addresses? (true/false)
   # -- Example --
   # restricted: true
@@ -34,19 +40,25 @@ server:
 
 # Configuration for log output
 output:
+  # What length should component names be padded up to? (integer)
+  # This makes the log more readable, provided most component names are under this length.
+  # -- Example --
+  # component_pad: 24
+  component_pad: 24
+
   # Should the server log to files as well as the console? (true/false)
   # -- Example --
   # log_to_file: true
   log_to_file: true
 
-  # How often (in hours) should the server create a new log file? (number)
+  # How often (in hours) should the server create a new log file? (integer)
   # -- Example --
   # file_duration: 24
   file_duration: 24
 
-  # How many old log files should the server retain?
+  # How many old log files should the server retain? (integer)
   # -- Example --
-  # file_history: 30
-  file_history: 30
+  # file_history: 10
+  file_history: 10
 
 # That's it! You're done setting up MirrorLog.
