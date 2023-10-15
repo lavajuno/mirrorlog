@@ -9,6 +9,9 @@ import java.util.Vector;
  */
 //@SuppressWarnings("unused")
 public class YamlList extends YamlElement {
+    /**
+     * The contents of this YamlList
+     */
     public final Vector<String> CONTENTS;
 
     /**

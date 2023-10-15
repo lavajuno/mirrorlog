@@ -5,6 +5,9 @@ package org.lavajuno.mirrorlog.yaml;
  * A YamlValue never has children (YamlValue.ELEMENTS will always be null).
  */
 public class YamlValue extends YamlElement {
+    /**
+     * The contents of this YamlValue
+     */
     public final String CONTENTS;
 
     /**
