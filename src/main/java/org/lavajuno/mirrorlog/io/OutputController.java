@@ -14,20 +14,31 @@ public class OutputController extends Thread {
     /**
      * New log entries will be stored in a blocking FIFO queue.
      */
-    private final BlockingQueue<LogEvent> outputQueue;
+    private final BlockingQueue<LogEvent> output_queue;
 
-    private final ApplicationConfig applicationConfig;
+    /**
+     * This OutputController's ApplicationConfig
+     */
+    private final ApplicationConfig application_config;
 
+    /**
+     * The log file that we're writing to
+     */
     private LogFile logFile;
+
+    /**
+     * Whether we should log to files
+     */
+    private final boolean LOG_TO_FILE;
 
     /**
      * Instantiates an OutputController.
      */
-    public OutputController(ApplicationConfig applicationConfig) throws IOException {
-        this.applicationConfig = applicationConfig;
-        outputQueue = new LinkedBlockingQueue<>();
-        logFile = new LogFile(applicationConfig);
-
+    public OutputController(ApplicationConfig application_config) throws IOException {
+        this.application_config = application_config;
+        this.output_queue = new LinkedBlockingQueue<>();
+        this.LOG_TO_FILE = application_config.isLogToFile();
+        if(LOG_TO_FILE) { logFile = new LogFile(application_config); }
     }
 
     /**
@@ -37,7 +48,7 @@ public class OutputController extends Thread {
      * @param message Message to be logged
      */
     public void submitEvent(String component_name, int severity, String message) {
-        outputQueue.add(new LogEvent(component_name, severity, message));
+        output_queue.add(new LogEvent(component_name, severity, message, application_config));
     }
 
     /**
@@ -49,18 +60,20 @@ public class OutputController extends Thread {
         LogEvent event;
         try {
             while(true) {
-                event = outputQueue.take();
-                if(logFile.isExpired()) {
-                    logFile.close();
-                    try {
-                        logFile = new LogFile(applicationConfig);
-                    } catch(IOException e) {
-                        System.err.println("Failed to create new log file!");
-                    }
+                event = output_queue.take();
+                if(LOG_TO_FILE) {
+                    if(logFile.isExpired()) {
+                        logFile.close();
+                        try {
+                            logFile = new LogFile(application_config);
+                        } catch(IOException e) {
+                            System.err.println("Failed to create new log file!");
+                        }
 
+                    }
+                    logFile.print(event);
                 }
                 System.out.println(event.toPrettyString());
-                logFile.print(event);
             }
         } catch(InterruptedException e) {
             System.out.println("Flushing output buffer to log file...");

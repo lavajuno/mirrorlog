@@ -1,6 +1,8 @@
 package org.lavajuno.mirrorlog.io;
 
-import java.text.SimpleDateFormat;
+import org.lavajuno.mirrorlog.config.ApplicationConfig;
+import org.lavajuno.mirrorlog.main.LogMap;
+
 import java.util.Date;
 
 /**
@@ -9,38 +11,9 @@ import java.util.Date;
  */
 public class LogEvent {
     /**
-     * The length that component names should be padded to
+     * The length to pad component names to
      */
-    private static final int NAME_PAD_LENGTH = 24;
-
-    /**
-     * The date and time format of log events.
-     */
-    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    /**
-     * Color and header of messages with severity 0
-     */
-    private static final String SEVERITY_INFO_PRETTY = " \u001B[32m[ INFO ]\u001B[0m  ";
-    private static final String SEVERITY_INFO = " [ INFO ]  ";
-
-    /**
-     * Color and header of messages with severity 1
-     */
-    private static final String SEVERITY_WARN_PRETTY = " \u001B[33m[ WARN ]\u001B[0m  ";
-    private static final String SEVERITY_WARN = " [ WARN ]  ";
-
-    /**
-     * Color and header of messages with severity 2
-     */
-    private static final String SEVERITY_ERROR_PRETTY = " \u001B[31m[ ERROR ]\u001B[0m ";
-    private static final String SEVERITY_ERROR = " [ ERROR ] ";
-
-    /**
-     * Color and header of messages with severity 3
-     */
-    private static final String SEVERITY_FATAL_PRETTY = " \u001B[31m[ FATAL ]\u001B[0m ";
-    private static final String SEVERITY_FATAL = " [ FATAL ] ";
+    private final int COMPONENT_PAD;
 
     /**
      * The component name for this LogEvent
@@ -63,56 +36,61 @@ public class LogEvent {
      * @param severity The severity of the event
      * @param message The message to be logged
      */
-    public LogEvent(String component_name, int severity, String message) {
+    public LogEvent(String component_name, int severity, String message, ApplicationConfig application_config) {
         this.component_name = component_name;
         this.severity = severity;
         this.message = message;
+        this.COMPONENT_PAD = application_config.getComponentPad();
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(LOG_DATE_FORMAT.format(new Date()));
+        sb.append(LogMap.LOG_DATE_FORMAT.format(new Date()));
         switch(severity) {
             case 1:
-                sb.append(SEVERITY_WARN);
+                sb.append(LogMap.SEVERITY_WARN);
                 break;
             case 2:
-                sb.append(SEVERITY_ERROR);
+                sb.append(LogMap.SEVERITY_ERROR);
                 break;
             case 3:
-                sb.append(SEVERITY_FATAL);
+                sb.append(LogMap.SEVERITY_FATAL);
                 break;
             default:
-                sb.append(SEVERITY_INFO);
+                sb.append(LogMap.SEVERITY_INFO);
                 break;
         }
         sb.append(component_name);
-        sb.append(" ".repeat(Math.max(0, NAME_PAD_LENGTH - component_name.length())));
+        sb.append(" ".repeat(Math.max(0, COMPONENT_PAD - component_name.length())));
         sb.append(" : ");
         sb.append(message);
         return sb.toString();
     }
 
+    /**
+     * Like toString, but with colored status indicators.
+     * @return This LogEvent as a string.
+     */
     public String toPrettyString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(LOG_DATE_FORMAT.format(new Date()));
+        sb.append(LogMap.LOG_DATE_FORMAT.format(new Date()));
         switch(severity) {
             case 1:
-                sb.append(SEVERITY_WARN_PRETTY);
+                sb.append(LogMap.SEVERITY_WARN_PRETTY);
                 break;
             case 2:
-                sb.append(SEVERITY_ERROR_PRETTY);
+                sb.append(LogMap.SEVERITY_ERROR_PRETTY);
                 break;
             case 3:
-                sb.append(SEVERITY_FATAL_PRETTY);
+                sb.append(LogMap.SEVERITY_FATAL_PRETTY);
                 break;
             default:
-                sb.append(SEVERITY_INFO_PRETTY);
+                sb.append(LogMap.SEVERITY_INFO_PRETTY);
                 break;
         }
         sb.append(component_name);
-        sb.append(" ".repeat(Math.max(0, NAME_PAD_LENGTH - component_name.length())));
+        sb.append(" ".repeat(Math.max(0, COMPONENT_PAD - component_name.length())));
         sb.append(" : ");
         sb.append(message);
         return sb.toString();

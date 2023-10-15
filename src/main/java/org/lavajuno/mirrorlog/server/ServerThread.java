@@ -1,28 +1,25 @@
 package org.lavajuno.mirrorlog.server;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.lavajuno.mirrorlog.config.ApplicationConfig;
 import org.lavajuno.mirrorlog.io.OutputController;
+import org.lavajuno.mirrorlog.main.LogMap;
 
 /**
  * ServerThread serves a single client and queues events
  * for the OutputController to process.
  */
 public class ServerThread extends Thread {
-
-    /**
-     * Input buffer size (in bytes)
-     */
-    private static final int LINE_BUFFER = 2048;
-
     /**
      * Boot clients that don't send anything for longer than this time (milliseconds)
      */
-    private static final int SOCKET_TIMEOUT = 600000; // 10 minutes
+    //private static final int SOCKET_TIMEOUT = 600000; // 10 minutes
 
     /**
      * Socket to communicate with client over
@@ -32,7 +29,7 @@ public class ServerThread extends Thread {
     /**
      * The client's IP address
      */
-    private final String client_address;
+    private final InetAddress client_address;
 
     /**
      * The ServerController's OutputController
@@ -45,29 +42,40 @@ public class ServerThread extends Thread {
     private String client_component_name;
 
     /**
+     * This ServerThread's application coniguration
+     */
+    private final ApplicationConfig application_config;
+
+    /**
      * Instantiates a ServerThread.
      * @param socket Socket to communicate with client over
      * @param outputController OutputController to queue events in
      */
-    public ServerThread(Socket socket, OutputController outputController) {
+    public ServerThread(Socket socket, OutputController outputController, ApplicationConfig application_config) {
         this.socket = socket;
         this.outputController = outputController;
         this.client_component_name = "(not specified)";
-        this.client_address = socket.getInetAddress().toString();
+        this.client_address = socket.getInetAddress();
+        this.application_config = application_config;
     }
 
     @Override
     public void run() {
         try {
+            if(application_config.isRestricted() &&
+                    !application_config.getAllowedAddresses().contains(client_address)) {
+                socket.close();
+                return;
+            }
             outputController.submitEvent(
                     "Log Server",
                     0,
                     "Client at " + client_address + " connected."
             );
-            socket.setSoTimeout(SOCKET_TIMEOUT);
+            socket.setSoTimeout(application_config.getTimeout());
             BufferedInputStream inFromClient = new BufferedInputStream(socket.getInputStream());
             BufferedOutputStream outToClient = new BufferedOutputStream(socket.getOutputStream());
-            byte[] line_buf = new byte[LINE_BUFFER];
+            byte[] line_buf = new byte[LogMap.INPUT_BUFFER_SIZE];
             int line_index = 0;
             // Read the first byte from the stream
             int next = inFromClient.read();
@@ -115,13 +123,14 @@ public class ServerThread extends Thread {
                 } else {
                     line_buf[line_index] = (byte) next;
                     line_index++;
-                    if(line_index >= LINE_BUFFER) {
+                    if(line_index >= LogMap.INPUT_BUFFER_SIZE) {
                         throw new IOException("Bad request.");
                     }
 
                 }
                 next = inFromClient.read();
             }
+            socket.close();
             outputController.submitEvent(
                     "Log Server",
                     0,
