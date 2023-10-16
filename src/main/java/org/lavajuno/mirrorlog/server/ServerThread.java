@@ -95,7 +95,7 @@ public class ServerThread extends Thread {
                         // Set the severity to default (0)
                         int severity = 0;
                         // Catch the @ComponentName command
-                        if(line_str.matches("^@ComponentName .{2,32}$")) {
+                        if(line_str.matches("^@ComponentName .{1,128}$")) {
                             client_component_name = line_str.substring("@ComponentName ".length());
                         } else { // This is a regular log event
                             // If a severity indicator is included in the event
