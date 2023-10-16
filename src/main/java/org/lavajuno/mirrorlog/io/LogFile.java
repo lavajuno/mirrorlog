@@ -14,7 +14,7 @@ import java.util.Vector;
 
 public class LogFile {
     private static final String LOGS_PATH = "logs/";
-    private static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm");
+    private static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHH");
 
     private final long DATE_EXPIRY;
 
@@ -57,9 +57,15 @@ public class LogFile {
         File[] path_contents = new File(path).listFiles();
         if(path_contents == null || path_contents.length == 0) { return; }
         Vector<String> path_datetags = new Vector<>();
+        String filename;
         for(File i : path_contents) {
             if(i.isFile()) {
-                path_datetags.add(i.getName().split("\\.", 2)[0]);
+                filename = i.getName().split("\\.", 2)[0];
+                try {
+                    Integer.parseInt(filename);
+                } catch(NumberFormatException e) {
+                    path_datetags.add(filename);
+                }
             }
         }
         int n_extra_logs = path_datetags.size() - max_logs;
