@@ -57,27 +57,38 @@ public class OutputController extends Thread {
      */
     @Override
     public void run() {
-        LogEvent event;
+        LogEvent event = null; /* needs to be initialized for exception handler */
         try {
             while(true) {
                 event = output_queue.take();
-                if(LOG_TO_FILE) {
-                    if(logFile.isExpired()) {
-                        logFile.close();
-                        try {
-                            logFile = new LogFile(application_config);
-                        } catch(IOException e) {
-                            System.err.println("Failed to create new log file!");
-                        }
+                write(event);
 
-                    }
-                    logFile.print(event);
-                }
-                System.out.println(event.toPrettyString());
             }
         } catch(InterruptedException e) {
-            System.out.println("Flushing output buffer to log file...");
+            System.out.println("Flushing output queue...");
+            while((event = output_queue.poll()) != null) { write(event); }
+            System.out.println("Writing to log file...");
             logFile.close();
         }
+    }
+
+    /**
+     * Writes an event to the log.
+     * @param event LogEvent to write to the log.
+     */
+    private void write(LogEvent event) {
+        if(LOG_TO_FILE) {
+            if(logFile.isExpired()) {
+                logFile.close();
+                try {
+                    logFile = new LogFile(application_config);
+                } catch(IOException e) {
+                    System.err.println("Failed to create new log file!");
+                }
+
+            }
+            logFile.print(event);
+        }
+        System.out.println(event.toPrettyString());
     }
 }
