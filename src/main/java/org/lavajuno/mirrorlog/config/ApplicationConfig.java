@@ -1,10 +1,12 @@
 package org.lavajuno.mirrorlog.config;
 
-import org.lavajuno.mirrorlog.yaml.YamlReader;
 import org.lavajuno.mirrorlog.yaml.YamlElement;
 import org.lavajuno.mirrorlog.yaml.YamlList;
 import org.lavajuno.mirrorlog.yaml.YamlValue;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,7 +36,7 @@ public class ApplicationConfig {
      */
     public ApplicationConfig(String config_file_path) throws IOException {
         /* Parse configuration file */
-        final YamlElement config_root = YamlReader.readFromFile(config_file_path);
+        final YamlElement config_root = new YamlElement(readLinesFromFile(config_file_path));
 
         /* Get configuration revision */
         final YamlValue config_revision = (YamlValue) config_root.getElement("revision");
@@ -167,6 +169,31 @@ public class ApplicationConfig {
      * @return The number of old log files to keep
      */
     public int getFileHistory() { return file_history; }
+
+
+    /**
+     * Reads a vector of lines from a file
+     * @param file_path File path to read
+     * @return Lines in the file
+     * @throws IOException If reading from the file fails
+     */
+    private static Vector<String> readLinesFromFile(String file_path) throws IOException {
+        try {
+            BufferedReader f = new BufferedReader(new FileReader(file_path));
+            Vector<String> lines = new Vector<>();
+            for(String line = f.readLine(); line != null; line = f.readLine()) {
+                lines.add(line);
+            }
+            f.close();
+            return lines;
+        } catch(FileNotFoundException e) {
+            System.err.println("File \"" + file_path + "\" could not be read. (Not Found)");
+            throw new IOException("File \"" + file_path + "\" could not be read. (Not Found)");
+        } catch(IOException e) {
+            System.err.println("File \"" + file_path + "\" could not be read. (IOException)");
+            throw(e);
+        }
+    }
 
     @Override
     public String toString() {

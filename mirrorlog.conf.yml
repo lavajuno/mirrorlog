@@ -1,6 +1,29 @@
 # mirrorlog.conf.yml
 # Configuration file for MirrorLog
 
+# Please note that the YAML parser is very small and has some limitations:
+#   1- Lists must be in multiple-line form, and can only contain values.
+#     This will work:
+#       MyList:
+#       - MyValue
+#     This will NOT work:
+#       MyList:
+#       - MyElement: MyValue
+#   2- Values must be a single line, spanning & folding are not recognized.
+#   However, escape characters will be preserved, so you can make newlines this way.
+#     This will work:
+#       MyElement: "My\nValue"
+#     This will NOT work:
+#       MyElement1: |
+#         My
+#         Value
+#   3- Comments must be on their own line.
+#     This will work:
+#       # This is what MyElement does.
+#       MyElement:
+#     This will NOT work:
+#       MyElement: # This is what MyElement does.
+
 # Config file format revision (do not change this!)
 revision: 0
 
