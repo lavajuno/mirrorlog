@@ -72,53 +72,10 @@ public class YamlElement {
      * @param begin Index to start parsing at
      * @param end Index to stop parsing at
      * @param indent The indent of the block to parse
-     * @param root True if this is the root element and should have the key "root"
      * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
      */
-    YamlElement(Vector<String> lines, int begin, int end,
-                int indent, boolean root) throws InvalidPropertiesFormatException {
-        KEY = root ? "root" : parseKey(lines.get(begin));
-        ELEMENTS = new Vector<>();
-        String line;
-        int line_indent;
-        LINE_MATCHES line_match;
-        /* Iterate over each line */
-        for (int i = begin + 1; i < end; i++) {
-            line = lines.get(i);             /* Current line */
-            line_indent = parseIndent(line); /* Indent of the current line */
-            line_match = matchLine(line);    /* Current line's matched type */
-            if(line_match != LINE_MATCHES.IGNORE) {
-                /* Handle only lines in our indented block */
-                if(line_indent == indent) {
-                    switch(line_match) {
-                        case ELEMENT:
-                            if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
-                                /* If the line is the head of a list */
-                                ELEMENTS.add(new YamlList(lines, i, end));
-                            } else {
-                                /* If the line is an element with 0 or more children */
-                                ELEMENTS.add(new YamlElement(lines, i, end, indent + 2, false));
-                            }
-                            break;
-                        case STRING:
-                            /* If the line is an element with just a string */
-                            ELEMENTS.add(new YamlValue(line));
-                            break;
-                        case NONE:
-                            /* If no match was found */
-                            System.err.println("vv  Syntax error on line:  vv");
-                            System.err.println(line);
-                            System.err.println("^^  ---------------------  ^^");
-                            throw new InvalidPropertiesFormatException("Syntax error on line " + i + ".");
-                    }
-                } else if(line_indent < indent) {
-                    /* Stop reading once we reach the end of our indented block. */
-                    break;
-                }
-                /* If the line's indent is greater, skip it. */
-            }
-            /* If a line is commented or blank, skip it. */
-        }
+    YamlElement(Vector<String> lines, int begin, int end, int indent) throws InvalidPropertiesFormatException {
+        this(parseKey(lines.get(begin)), parseElements(lines, begin + 1, end, indent));
     }
 
     /**
@@ -131,7 +88,7 @@ public class YamlElement {
      * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
      */
     public YamlElement(Vector<String> lines) throws InvalidPropertiesFormatException {
-        this(lines, 0, lines.size(), 0, true);
+        this("root", parseElements(lines, 0, lines.size(), 0));
     }
 
     /**
@@ -144,6 +101,62 @@ public class YamlElement {
             if(i.KEY.equals(key)) { return i; }
         }
         throw new IOException("Key \"" + key + "\" not found.");
+    }
+
+    /**
+     * Parses and constructs this YamlElement's children.
+     * @param lines Lines of YAML to parse
+     * @param begin Index to start parsing at
+     * @param end Index to stop parsing at
+     * @param indent Indent of the block to parse
+     * @return Vector of YamlElements belonging to this YamlElement
+     * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
+     */
+    private static Vector<YamlElement> parseElements(Vector<String> lines, int begin,
+                                                     int end, int indent) throws InvalidPropertiesFormatException {
+        Vector<YamlElement> my_elements = new Vector<>();
+        String line;
+        int line_indent;
+        LINE_MATCHES line_match;
+
+        /* Iterate over each line */
+        for (int i = begin; i < end; i++) {
+            line = lines.get(i);             /* Current line */
+            line_indent = parseIndent(line); /* How indented this line is */
+            line_match = matchLine(line);    /* This line's matched type */
+
+            if(line_match != LINE_MATCHES.IGNORE) {
+                /* Handle only lines in our indented block */
+                if(line_indent == indent) {
+                    switch(line_match) {
+                        case ELEMENT:
+                            if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
+                                /* If the line is the head of a list */
+                                my_elements.add(new YamlList(lines, i, end));
+                            } else {
+                                /* If the line is an element with 0 or more children */
+                                my_elements.add(new YamlElement(lines, i, end, indent + 2));
+                            }
+                            break;
+                        case STRING:
+                            /* If the line is an element with just a string */
+                            my_elements.add(new YamlValue(line));
+                            break;
+                        case NONE:
+                            /* If no match was found */
+                            System.err.println("vv  Syntax error on line:  vv");
+                            System.err.println(line);
+                            System.err.println("^^  ---------------------  ^^");
+                            throw new InvalidPropertiesFormatException("Syntax error on line " + i + ".");
+                    }
+                } else if(line_indent < indent) {
+                    /* Stop reading once we reach the end of our indented block. */
+                    break;
+                }
+                /* If the line's indent is greater, just skip reading it. */
+            }
+        }
+        return my_elements;
     }
 
     /**
