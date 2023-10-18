@@ -1,6 +1,5 @@
 package org.lavajuno.mirrorlog.yaml;
 
-
 import java.util.Vector;
 
 /**
@@ -22,22 +21,12 @@ public class YamlList extends YamlElement {
      */
     YamlList(Vector<String> lines, int begin, int end) {
         super(YamlElement.parseKey(lines.get(begin)), null);
-        this.CONTENTS = parseList(lines, begin + 1, end);
-    }
-
-    /**
-     * Parses this YamlList's items
-     * @param lines Lines of YAML to parse
-     * @param begin Index to start parsing at
-     * @param end Index to stop parsing at
-     * @return This YamlList's items
-     */
-    private static Vector<String> parseList(Vector<String> lines, int begin, int end) {
-        Vector<String> values = new Vector<>();
+        /* Parse lines and populate list items */
+        CONTENTS = new Vector<>();
         String line;
         String value;
         /* Iterate over each line */
-        for(int i = begin; i < end; i++) {
+        for(int i = begin + 1; i < end; i++) {
             line = lines.get(i);
             /* If the line is a valid list entry, record it */
             if(line.matches(YamlElement.LIST_ENTRY_RGX)) {
@@ -45,9 +34,9 @@ public class YamlList extends YamlElement {
                 String head = value.substring(0, 1);
                 /* Trim quotes if they exist */
                 if(head.equals("\"") || head.equals("'")) {
-                    values.add(value.substring(1, value.length() - 1));
+                    CONTENTS.add(value.substring(1, value.length() - 1));
                 } else {
-                    values.add(value);
+                    CONTENTS.add(value);
                 }
             } else { /* If the line is NOT a valid list entry */
                 if(!line.matches(IGNORE_RGX)) {
@@ -58,7 +47,6 @@ public class YamlList extends YamlElement {
                 /* Skip blank/comment lines */
             }
         }
-        return values;
     }
 
     @Override
