@@ -94,10 +94,20 @@ public class ServerThread extends Thread {
                         );
                         // Set the severity to default (0)
                         int severity = 0;
-                        // Catch the @ComponentName command
+                        // Catch @ComponentName command
                         if(line_str.matches("^@ComponentName .{1,128}$")) {
                             client_component_name = line_str.substring("@ComponentName ".length());
-                        } else { // This is a regular log event
+                            outToClient.write((client_component_name + "\r\n").getBytes(StandardCharsets.UTF_8));
+                            outToClient.flush();
+                        }
+                        // Catch @KeepAlive command
+                        else if(line_str.matches("^@KeepAlive*$")) {
+
+                            outToClient.write("@KeepAlive\r\n".getBytes(StandardCharsets.UTF_8));
+                            outToClient.flush();
+                        }
+                        // Otherwise, this is a regular log event
+                        else {
                             // If a severity indicator is included in the event
                             if(line_str.matches("^[0-3].*$")) {
                                 try {
@@ -110,10 +120,11 @@ public class ServerThread extends Thread {
                                         severity,
                                         line_str.substring(1)
                                 );
-                            } else { // If no severity indicator is included in the event
+                            } else {
+                                // If no severity indicator is included in the event
                                 outputController.submitEvent(client_component_name, severity, line_str);
                             }
-                            // Respond
+                            // Acknowledge the request
                             outToClient.write((line_str + "\r\n").getBytes(StandardCharsets.UTF_8));
                             outToClient.flush();
                         }
@@ -121,13 +132,14 @@ public class ServerThread extends Thread {
                         line_index = 0;
                     }
                 } else {
+                    // Append current byte to buffer and increment index
                     line_buf[line_index] = (byte) next;
                     line_index++;
                     if(line_index >= LogMap.INPUT_BUFFER_SIZE) {
                         throw new IOException("Bad request.");
                     }
-
                 }
+                // Read next byte
                 next = inFromClient.read();
             }
             socket.close();
