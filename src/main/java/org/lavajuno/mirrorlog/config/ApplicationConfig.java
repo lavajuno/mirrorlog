@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -59,38 +60,38 @@ public class ApplicationConfig {
         /* Read in and set configuration variables */
 
         try {
-            this.revision = Integer.parseInt(config_revision.CONTENTS);
+            this.revision = Integer.parseInt(config_revision.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"version\".");
             throw new IOException("Illegal value for key \"version\".");
         }
 
         try {
-            this.threads = Integer.parseInt(config_threads.CONTENTS);
+            this.threads = Integer.parseInt(config_threads.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"threads\".");
             throw new IOException("Illegal value for key \"threads\".");
         }
 
         try {
-            this.port = Integer.parseInt(config_port.CONTENTS);
+            this.port = Integer.parseInt(config_port.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"port\".");
             throw new IOException("Illegal value for key \"port\".");
         }
 
         try {
-            this.timeout = Integer.parseInt(config_timeout.CONTENTS);
+            this.timeout = Integer.parseInt(config_timeout.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"timeout\".");
             throw new IOException("Illegal value for key \"timeout\".");
         }
 
-        this.restricted = Boolean.parseBoolean(config_restricted.CONTENTS);
+        this.restricted = Boolean.parseBoolean(config_restricted.getContents());
 
         allowed_addresses = new Vector<>();
         try {
-            for(String i : config_addresses.CONTENTS) {
+            for(String i : config_addresses.getContents()) {
                 allowed_addresses.add(InetAddress.getByName(i));
             }
         } catch(UnknownHostException e) {
@@ -99,23 +100,23 @@ public class ApplicationConfig {
         }
 
         try {
-            this.component_pad = Integer.parseInt(config_component_pad.CONTENTS);
+            this.component_pad = Integer.parseInt(config_component_pad.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"component_pad\".");
             throw new IOException("Illegal value for key \"component_pad\".");
         }
 
-        this.log_to_file = Boolean.parseBoolean(config_log_to_file.CONTENTS);
+        this.log_to_file = Boolean.parseBoolean(config_log_to_file.getContents());
 
         try {
-            this.file_duration = Integer.parseInt(config_file_duration.CONTENTS);
+            this.file_duration = Integer.parseInt(config_file_duration.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"file_duration\".");
             throw new IOException("Illegal value for key \"file_duration\".");
         }
 
         try {
-            this.file_history = Integer.parseInt(config_file_history.CONTENTS);
+            this.file_history = Integer.parseInt(config_file_history.getContents());
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"file_history\".");
             throw new IOException("Illegal value for key \"file_history\".");
@@ -172,12 +173,12 @@ public class ApplicationConfig {
 
 
     /**
-     * Reads a vector of lines from a file
+     * Reads a list of lines from a file
      * @param file_path File path to read
      * @return Lines in the file
      * @throws IOException If reading from the file fails
      */
-    private static Vector<String> readLinesFromFile(String file_path) throws IOException {
+    private static List<String> readLinesFromFile(String file_path) throws IOException {
         try {
             BufferedReader f = new BufferedReader(new FileReader(file_path));
             Vector<String> lines = new Vector<>();
