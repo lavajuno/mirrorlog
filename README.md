@@ -65,6 +65,12 @@ Logs will look best when component names are shorter than the length that they a
 2023-10-16 10:30:10 [ ERROR ] Website        : GET /admin.html 403 FORBIDDEN
 ```
 
+To prevent your connection from timing out, you can periodically send the server a keep-alive ping:
+
+`@KeepAlive\r\n`
+
+The server will echo the above line back to you to indicate that the timeout has been reset.
+
 You can tinker with the server easily using `telnet` (all communication will be human-readable).
 
 ## Licensing
