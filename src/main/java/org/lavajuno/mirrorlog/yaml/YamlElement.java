@@ -36,13 +36,13 @@ public class YamlElement {
     /**
      * Matches lines containing a list entry (ex. "  - ListItem1")
      */
-    static final String LIST_ENTRY_RGX = "^ *- +.+$";
+    static final String LIST_ENTRY_RGX = "^ *- +[^ ].+$";
 
     /**
      * Possible matches for a line
      */
     private enum LINE_MATCHES {
-        IGNORE, ELEMENT, STRING, NONE
+        IGNORE, ELEMENT, STRING, LIST_ENTRY, NONE
     }
 
     /**
@@ -88,7 +88,7 @@ public class YamlElement {
             throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new TreeMap<>();
-        for(int i = begin + 1; i < end; i++) {
+        for(int i = begin; i < end; i++) {
             String line = lines.get(i);                /* Current line */
             int line_indent = parseIndent(line);       /* How indented this line is */
             LINE_MATCHES line_match = matchLine(line); /* This line's matched type */
@@ -100,16 +100,18 @@ public class YamlElement {
                     case ELEMENT:
                         /* If the line is the head of a list */
                         if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
-                            ELEMENTS.put(k, new YamlList(k, lines, i, end));
+                            ELEMENTS.put(k, new YamlList(k, lines, i + 1, end));
                         }
                         /* If the line is an element with 0 or more children */
                         else {
-                            ELEMENTS.put(k, new YamlElement(k, lines, i, end, indent + 2));
+                            ELEMENTS.put(k, new YamlElement(k, lines, i + 1, end, indent + 2));
                         }
                         break;
                     case STRING:
                         /* If the line is an element with just a string */
                         ELEMENTS.put(k, new YamlValue(k, line));
+                        break;
+                    case LIST_ENTRY:
                         break;
                     case NONE:
                         /* If no match was found, we don't know what to do with the line */
@@ -177,6 +179,8 @@ public class YamlElement {
             return LINE_MATCHES.ELEMENT;
         } else if(line.matches(STRING_RGX)) {
             return LINE_MATCHES.STRING;
+        } else if(line.matches(LIST_ENTRY_RGX)) {
+            return LINE_MATCHES.LIST_ENTRY;
         } else {
             return LINE_MATCHES.NONE;
         }

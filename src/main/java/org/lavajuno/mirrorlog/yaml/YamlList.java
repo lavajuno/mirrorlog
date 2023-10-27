@@ -28,11 +28,11 @@ public class YamlList extends YamlElement {
         String line;
         String value;
         /* Iterate over each line */
-        for(int i = begin + 1; i < end; i++) {
+        for(int i = begin; i < end; i++) {
             line = lines.get(i);
             /* If the line is a valid list entry, record it */
             if(line.matches(YamlElement.LIST_ENTRY_RGX)) {
-                value = line.split("- ", 2)[1];
+                value = line.split("- +", 2)[1];
                 String head = value.substring(0, 1);
                 String tail = value.substring(value.length() - 1);
                 /* Trim quotes if they exist */
