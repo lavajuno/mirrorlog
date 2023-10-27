@@ -1,8 +1,7 @@
 package org.lavajuno.mirrorlog.yaml;
 
 import java.io.IOException;
-import java.util.InvalidPropertiesFormatException;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * YamlElement represents a single YAML element.
@@ -54,14 +53,14 @@ public class YamlElement {
     /**
      * This YAML element's children
      */
-    public final Vector<YamlElement> ELEMENTS;
+    public final TreeMap<String, YamlElement> ELEMENTS;
 
     /**
      * Constructs a YAMLElement.
      * @param key this YAMLElement's key
      * @param elements this YAMLElement's children
      */
-    YamlElement(String key, Vector<YamlElement> elements) {
+    YamlElement(String key, TreeMap<String, YamlElement> elements) {
         this.KEY = key;
         this.ELEMENTS = elements;
     }
@@ -96,11 +95,8 @@ public class YamlElement {
      * @param key The key to match
      * @return The first element found with the given key (or null if none are found)
      */
-    public YamlElement getElement(String key) throws IOException {
-        for(YamlElement i : ELEMENTS) {
-            if(i.KEY.equals(key)) { return i; }
-        }
-        throw new IOException("Key \"" + key + "\" not found.");
+    public YamlElement getElement(String key) {
+        return ELEMENTS.get(key);
     }
 
     /**
@@ -112,9 +108,9 @@ public class YamlElement {
      * @return Vector of YamlElements belonging to this YamlElement
      * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
      */
-    private static Vector<YamlElement> parseElements(Vector<String> lines, int begin,
+    private static TreeMap<String, YamlElement> parseElements(Vector<String> lines, int begin,
                                                      int end, int indent) throws InvalidPropertiesFormatException {
-        Vector<YamlElement> my_elements = new Vector<>();
+        TreeMap<String, YamlElement> my_elements = new TreeMap<>();
         String line;
         int line_indent;
         LINE_MATCHES line_match;
@@ -132,15 +128,15 @@ public class YamlElement {
                         case ELEMENT:
                             if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
                                 /* If the line is the head of a list */
-                                my_elements.add(new YamlList(lines, i, end));
+                                my_elements.put(parseKey(line), new YamlList(lines, i, end));
                             } else {
                                 /* If the line is an element with 0 or more children */
-                                my_elements.add(new YamlElement(lines, i, end, indent + 2));
+                                my_elements.put(parseKey(line), new YamlElement(lines, i, end, indent + 2));
                             }
                             break;
                         case STRING:
                             /* If the line is an element with just a string */
-                            my_elements.add(new YamlValue(line));
+                            my_elements.put(parseKey(line), new YamlValue(line));
                             break;
                         case NONE:
                             /* If no match was found */
@@ -194,14 +190,23 @@ public class YamlElement {
         }
     }
 
-    @Override
-    public String toString() {
+    /**
+     * Alternate toString that preserves indents to output valid YAML.
+     * There is no need to call this function on the root YamlElement.
+     * Just call toString, it will take care of indentation for you.
+     * @param indent Indent of this YamlElement
+     * @return This YamlElement as a String
+     */
+    public String toString(int indent) {
         StringBuilder sb = new StringBuilder();
-        sb.append("YamlElement - \"").append(this.KEY).append("\": {\n");
-        for(YamlElement i : this.ELEMENTS) {
-            sb.append(i.toString());
+        String indent_prefix = " ".repeat(indent);
+        sb.append(indent_prefix).append(this.KEY).append(":\n");
+        for(YamlElement i : this.ELEMENTS.values()) {
+            sb.append(i.toString(indent + 2));
         }
-        sb.append("} /\"").append(KEY).append("\"\n");
         return sb.toString();
     }
+
+    @Override
+    public String toString() { return this.toString(0); }
 }

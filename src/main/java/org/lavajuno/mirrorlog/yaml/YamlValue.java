@@ -30,7 +30,13 @@ public class YamlValue extends YamlElement {
     }
 
     @Override
-    public String toString() {
-        return "YamlValue - Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS + "\"\n";
+    public String toString(int indent) {
+        StringBuilder sb = new StringBuilder();
+        String indent_prefix = " ".repeat(indent);
+        sb.append(indent_prefix).append(this.KEY).append(": ").append(this.CONTENTS).append("\n");
+        return sb.toString();
     }
+
+    @Override
+    public String toString() { return this.toString(0); }
 }

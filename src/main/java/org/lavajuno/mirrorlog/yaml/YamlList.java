@@ -6,7 +6,7 @@ import java.util.Vector;
  * YamlList is a YamlElement that contains a list of Strings.
  * A YamlList never has children (YamlList.ELEMENTS will always be null).
  */
-//@SuppressWarnings("unused")
+@SuppressWarnings("unused")
 public class YamlList extends YamlElement {
     /**
      * The contents of this YamlList
@@ -50,7 +50,16 @@ public class YamlList extends YamlElement {
     }
 
     @Override
-    public String toString() {
-        return "YamlList - Key: \"" + this.KEY + "\", Contents: \"" + this.CONTENTS.toString() + "\"\n";
+    public String toString(int indent) {
+        StringBuilder sb = new StringBuilder();
+        String indent_prefix = " ".repeat(indent);
+        sb.append(indent_prefix).append(this.KEY).append(":").append("\n");
+        for(String i : this.CONTENTS) {
+            sb.append(indent_prefix).append("- ").append(i).append("\n");
+        }
+        return sb.toString();
     }
+
+    @Override
+    public String toString() { return this.toString(0); }
 }
