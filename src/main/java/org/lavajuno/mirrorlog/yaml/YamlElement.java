@@ -32,7 +32,7 @@ public class YamlElement {
     /**
      * Matches lines containing a value (ex. "ElementName: ElementValue")
      */
-    static final String STRING_RGX = "^ *[A-Za-z0-9_-]+: +\"?.+\"?$";
+    static final String STRING_RGX = "^ *[A-Za-z0-9_-]+: +.+$";
 
     /**
      * Matches lines containing a list entry (ex. "  - ListItem1")
@@ -87,50 +87,47 @@ public class YamlElement {
      */
     YamlElement(String key, List<String> lines, int begin, int end, int indent)
             throws InvalidPropertiesFormatException {
-        /* TODO Switch and if/else structure should be improved, right now it is not very readable */
         this.KEY = key;
         this.ELEMENTS = new TreeMap<>();
-        /* Iterate over each line in the range we are parsing */
-        for (int i = begin + 1; i < end; i++) {
+        for(int i = begin + 1; i < end; i++) {
             String line = lines.get(i);                /* Current line */
             int line_indent = parseIndent(line);       /* How indented this line is */
             LINE_MATCHES line_match = matchLine(line); /* This line's matched type */
-            /* If this line is something we need to parse */
-            if(line_match != LINE_MATCHES.IGNORE) {
-                /* If this line matches our target indent */
-                if(line_indent == indent) {
-                    /* If there is a syntax error in this line, parseKey output will be ignored. */
-                    String k = parseKey(line);
-                    switch(line_match) {
-                        case ELEMENT:
-                            /* If the line is the head of a list */
-                            if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
-                                ELEMENTS.put(k, new YamlList(k, lines, i, end));
-                            }
-                            /* If the line is an element with 0 or more children */
-                            else {
-                                ELEMENTS.put(k, new YamlElement(k, lines, i, end, indent + 2));
-                            }
-                            break;
-                        case STRING:
-                            /* If the line is an element with just a string */
-                            ELEMENTS.put(k, new YamlValue(k, line));
-                            break;
-                        case NONE:
-                            /* If no match was found, we don't know what to do with the line */
-                            System.err.println("vv  YamlElement: Syntax error on line:  vv");
-                            System.err.println(line);
-                            System.err.println("^^  ----------------------------------  ^^");
-                            System.err.println("(Line " + i + " of input.)");
-                            throw new InvalidPropertiesFormatException("Syntax error on line " + i + " of input.");
-                    }
-                } else if(line_indent < indent) {
-                    /* Stop reading once we reach the end of our indented block */
-                    break;
+            /* If this line's indent matches that of our indented block */
+            if(line_indent == indent) {
+                /* If there is a syntax error in this line, output will be ignored. */
+                String k = parseKey(line);
+                switch(line_match) {
+                    case ELEMENT:
+                        /* If the line is the head of a list */
+                        if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
+                            ELEMENTS.put(k, new YamlList(k, lines, i, end));
+                        }
+                        /* If the line is an element with 0 or more children */
+                        else {
+                            ELEMENTS.put(k, new YamlElement(k, lines, i, end, indent + 2));
+                        }
+                        break;
+                    case STRING:
+                        /* If the line is an element with just a string */
+                        ELEMENTS.put(k, new YamlValue(k, line));
+                        break;
+                    case NONE:
+                        /* If no match was found, we don't know what to do with the line */
+                        System.err.println("vv  YamlElement: Syntax error on line:  vv");
+                        System.err.println(line);
+                        System.err.println("^^  ----------------------------------  ^^");
+                        System.err.println("(Line " + i + " of input.)");
+                        throw new InvalidPropertiesFormatException("Syntax error on line " + i + " of input.");
                 }
-                /* If the line's indent is greater, just skip reading it */
-                /* (not sure if we're done yet at this point) */
             }
+            /* If the indent of this line is less than that of our indented block */
+            else if(line_indent < indent && line_match != LINE_MATCHES.IGNORE) {
+                /* Stop reading once we reach the end of our indented block */
+                break;
+            }
+            /* If the indent is greater, skip the line */
+            /* (At this point, we cannot be sure that our block has ended) */
         }
     }
 
