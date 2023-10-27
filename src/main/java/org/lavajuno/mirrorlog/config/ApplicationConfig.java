@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -172,12 +173,12 @@ public class ApplicationConfig {
 
 
     /**
-     * Reads a vector of lines from a file
+     * Reads a list of lines from a file
      * @param file_path File path to read
      * @return Lines in the file
      * @throws IOException If reading from the file fails
      */
-    private static Vector<String> readLinesFromFile(String file_path) throws IOException {
+    private static List<String> readLinesFromFile(String file_path) throws IOException {
         try {
             BufferedReader f = new BufferedReader(new FileReader(file_path));
             Vector<String> lines = new Vector<>();
