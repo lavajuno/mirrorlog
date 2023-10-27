@@ -1,6 +1,5 @@
 package org.lavajuno.mirrorlog.yaml;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
