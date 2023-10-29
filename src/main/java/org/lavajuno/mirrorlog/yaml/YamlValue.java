@@ -42,7 +42,7 @@ public class YamlValue extends YamlElement {
     String toString(int indent) {
         StringBuilder sb = new StringBuilder();
         String indent_prefix = " ".repeat(indent);
-        sb.append(indent_prefix).append(this.getKey()).append(": ").append(this.CONTENTS).append("\n");
+        sb.append(indent_prefix).append(this.KEY).append(": ").append(this.CONTENTS).append("\n");
         return sb.toString();
     }
 

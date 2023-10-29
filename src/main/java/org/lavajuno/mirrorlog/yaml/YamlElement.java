@@ -48,12 +48,12 @@ public class YamlElement {
     /**
      * This YamlElement's key
      */
-    private final String KEY;
+    protected final String KEY;
 
     /**
      * This YamlElement's contained YamlElements
      */
-    private final TreeMap<String, YamlElement> ELEMENTS;
+    protected final TreeMap<String, YamlElement> ELEMENTS;
 
     /**
      * Constructs a YamlElement by recursively parsing lines of YAML into a structure of YamlElements.

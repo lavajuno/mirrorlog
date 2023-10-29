@@ -63,7 +63,7 @@ public class YamlList extends YamlElement {
     public String toString(int indent) {
         StringBuilder sb = new StringBuilder();
         String indent_prefix = " ".repeat(indent);
-        sb.append(indent_prefix).append(this.getKey()).append(":").append("\n");
+        sb.append(indent_prefix).append(this.KEY).append(":").append("\n");
         for(String i : this.CONTENTS) {
             sb.append(indent_prefix).append("- ").append(i).append("\n");
         }
