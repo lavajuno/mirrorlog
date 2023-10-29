@@ -12,18 +12,27 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
+/**
+ * LogFile handles creating, writing to, and deleting log files for OutputController.
+ */
 public class LogFile {
     private static final String LOGS_PATH = "logs/";
     private static final SimpleDateFormat FILE_DATE_FORMAT = new SimpleDateFormat("yyyyMMddHH");
-
     private final long DATE_EXPIRY;
-
     private final FileWriter log_file_writer;
     private final PrintWriter log_print_writer;
 
+    /**
+     * Instantiates a LogFile.
+     * Creates new files and cleans up old ones if needed.
+     * @param application_config ApplicationConfiguration to use
+     * @throws IOException Passes along IOExceptions from file accessors
+     */
     public LogFile(ApplicationConfig application_config) throws IOException {
         final String DATE_TAG = FILE_DATE_FORMAT.format(new Date());
         final Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
         calendar.add(Calendar.HOUR, application_config.getFileDuration());
         DATE_EXPIRY = Long.parseLong(FILE_DATE_FORMAT.format(calendar.getTime()));
         cleanupLogs(LOGS_PATH, application_config.getFileHistory());
@@ -34,10 +43,17 @@ public class LogFile {
         log_print_writer = new PrintWriter(log_file_writer, true);
     }
 
+    /**
+     * Prints a log event to the file.
+     * @param event Log event to print
+     */
     public void print(LogEvent event) {
         log_print_writer.println(event);
     }
 
+    /**
+     * Flushes output buffers and closes the file.
+     */
     public void close() {
         try {
             log_print_writer.flush();
@@ -49,10 +65,19 @@ public class LogFile {
         }
     }
 
+    /**
+     * Checks if this LogFile is expired.
+     * @return True if this LogFile is expired.
+     */
     public boolean isExpired() {
         return DATE_EXPIRY < Long.parseLong(FILE_DATE_FORMAT.format(new Date()));
     }
 
+    /**
+     * Cleans up old logs
+     * @param path Path to log directory
+     * @param max_logs Amount of log files to keep
+     */
     public void cleanupLogs(String path, int max_logs) {
         File[] path_contents = new File(path).listFiles();
         if(path_contents == null || path_contents.length == 0) { return; }

@@ -6,8 +6,8 @@ import org.lavajuno.mirrorlog.main.LogMap;
 import java.util.Date;
 
 /**
- * LogEvent stores a single log entry and provides functionality
- * to convert it to a string to be printed to the console or stored in a file.
+ * LogEvent stores a single log event and provides functionality to
+ * convert it to a string to be printed to the console or a file.
  */
 public class LogEvent {
     /**
@@ -35,37 +35,13 @@ public class LogEvent {
      * @param component_name The component name to be logged
      * @param severity The severity of the event
      * @param message The message to be logged
+     * @param application_config ApplicationConfig to use
      */
     public LogEvent(String component_name, int severity, String message, ApplicationConfig application_config) {
         this.component_name = component_name;
         this.severity = severity;
         this.message = message;
         this.COMPONENT_PAD = application_config.getComponentPad();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(LogMap.LOG_DATE_FORMAT.format(new Date()));
-        switch(severity) {
-            case 1:
-                sb.append(LogMap.SEVERITY_WARN);
-                break;
-            case 2:
-                sb.append(LogMap.SEVERITY_ERROR);
-                break;
-            case 3:
-                sb.append(LogMap.SEVERITY_FATAL);
-                break;
-            default:
-                sb.append(LogMap.SEVERITY_INFO);
-                break;
-        }
-        sb.append(component_name);
-        sb.append(" ".repeat(Math.max(0, COMPONENT_PAD - component_name.length())));
-        sb.append(" : ");
-        sb.append(message);
-        return sb.toString();
     }
 
     /**
@@ -87,6 +63,31 @@ public class LogEvent {
                 break;
             default:
                 sb.append(LogMap.SEVERITY_INFO_PRETTY);
+                break;
+        }
+        sb.append(component_name);
+        sb.append(" ".repeat(Math.max(0, COMPONENT_PAD - component_name.length())));
+        sb.append(" : ");
+        sb.append(message);
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(LogMap.LOG_DATE_FORMAT.format(new Date()));
+        switch(severity) {
+            case 1:
+                sb.append(LogMap.SEVERITY_WARN);
+                break;
+            case 2:
+                sb.append(LogMap.SEVERITY_ERROR);
+                break;
+            case 3:
+                sb.append(LogMap.SEVERITY_FATAL);
+                break;
+            default:
+                sb.append(LogMap.SEVERITY_INFO);
                 break;
         }
         sb.append(component_name);

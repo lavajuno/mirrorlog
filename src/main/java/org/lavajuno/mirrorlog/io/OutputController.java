@@ -11,33 +11,19 @@ import java.util.concurrent.LinkedBlockingQueue;
  * and handles printing them to the console as well as writing them to files.
  */
 public class OutputController extends Thread {
-    /**
-     * New log entries will be stored in a blocking FIFO queue.
-     */
     private final BlockingQueue<LogEvent> output_queue;
-
-    /**
-     * This OutputController's ApplicationConfig
-     */
     private final ApplicationConfig application_config;
-
-    /**
-     * The log file that we're writing to
-     */
     private LogFile logFile;
-
-    /**
-     * Whether we should log to files
-     */
     private final boolean LOG_TO_FILE;
 
     /**
      * Instantiates an OutputController.
+     * @param application_config ApplicationConfig to use
      */
     public OutputController(ApplicationConfig application_config) throws IOException {
         this.application_config = application_config;
         this.output_queue = new LinkedBlockingQueue<>();
-        this.LOG_TO_FILE = application_config.isLogToFile();
+        this.LOG_TO_FILE = application_config.getLogToFile();
         if(LOG_TO_FILE) { logFile = new LogFile(application_config); }
     }
 
@@ -53,7 +39,6 @@ public class OutputController extends Thread {
 
     /**
      * OutputController's thread.
-     * Takes
      */
     @Override
     public void run() {
@@ -85,7 +70,6 @@ public class OutputController extends Thread {
                 } catch(IOException e) {
                     System.err.println("Failed to create new log file!");
                 }
-
             }
             logFile.print(event);
         }

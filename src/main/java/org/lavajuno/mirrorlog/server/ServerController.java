@@ -9,7 +9,6 @@ import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ServerController accepts incoming connections and assigns
@@ -78,7 +77,6 @@ public class ServerController extends Thread {
 
     /**
      * Shuts down the thread pool and stops the server.
-     * It first tries to do this gracefully, but if it cannot, it will force them to stop.
      */
     public void close() {
         System.out.println("Sending shutdown signal to thread pool...");

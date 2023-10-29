@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * ApplicationConfig loads and stores the program configuration.
+ * ApplicationConfig loads and stores the program configuration, and
+ * provides functionality for retrieving configuration values.
  */
 @SuppressWarnings("unused")
 public class ApplicationConfig {
@@ -30,6 +31,7 @@ public class ApplicationConfig {
     private final int file_history;
 
     /**
+     * Instantiates an ApplicationConfig.
      * Loads program configuration from the specified configuration file,
      * and stores the resulting configuration in the instance.
      * @param config_file_path Path to the configuration file to load
@@ -57,8 +59,7 @@ public class ApplicationConfig {
         final YamlValue config_file_duration = (YamlValue) config_output.getElement("file_duration");
         final YamlValue config_file_history = (YamlValue) config_output.getElement("file_history");
 
-        /* Read in and set configuration variables */
-
+        /* Read in and set configuration values */
         try {
             this.revision = Integer.parseInt(config_revision.getContents());
         } catch(NumberFormatException e) {
@@ -123,54 +124,62 @@ public class ApplicationConfig {
         }
 
         /* Finished loading configuration */
-        System.out.println("Application configuration created: \n" + this);
+        System.out.println("Application configuration created:\n" + this);
     }
 
     /**
-     * @return The number of simultaneous connections the server will handle
+     * The number of simultaneous connections the server will handle
+     * @return The value of "threads"
      */
     public int getThreads() { return threads; }
 
     /**
-     * @return The port the server listens on
+     * The port the server listens on
+     * @return The value of "port"
      */
     public int getPort() { return port; }
 
     /**
-     * @return The socket timeout for inactive clients
+     * The socket timeout for inactive clients
+     * @return The value of "timeout"
      */
     public int getTimeout() { return timeout; }
 
     /**
-     * @return Whether access is restricted to certain IP addresses
+     * Whether access is restricted to certain IP addresses
+     * @return The value of "restricted"
      */
     public boolean isRestricted() { return restricted; }
 
     /**
-     * @return The list of allowed IP addresses
+     * The list of allowed IP addresses
+     * @return The value of "allowed_addresses"
      */
     public Vector<InetAddress> getAllowedAddresses() { return allowed_addresses; }
 
     /**
-     * @return The length that component names should be padded to
+     * The length that component names should be padded to
+     * @return The value of "component_pad"
      */
     public int getComponentPad() { return component_pad; }
 
     /**
-     * @return Whether the program should log to files as well as the console
+     * Whether the program should log to files as well as the console
+     * @return The value of "log_to_file"
      */
-    public boolean isLogToFile() { return log_to_file; }
+    public boolean getLogToFile() { return log_to_file; }
 
     /**
-     * @return The amount of time to be logged in each file
+     * The amount of time to be logged in each file
+     * @return The value of "file_duration"
      */
     public int getFileDuration() { return file_duration; }
 
     /**
-     * @return The number of old log files to keep
+     * The number of old log files to keep
+     * @return The value of "file_history"
      */
     public int getFileHistory() { return file_history; }
-
 
     /**
      * Reads a list of lines from a file

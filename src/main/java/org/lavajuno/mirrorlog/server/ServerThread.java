@@ -16,40 +16,17 @@ import org.lavajuno.mirrorlog.main.LogMap;
  * for the OutputController to process.
  */
 public class ServerThread extends Thread {
-    /**
-     * Boot clients that don't send anything for longer than this time (milliseconds)
-     */
-    //private static final int SOCKET_TIMEOUT = 600000; // 10 minutes
-
-    /**
-     * Socket to communicate with client over
-     */
     private final Socket socket;
-
-    /**
-     * The client's IP address
-     */
     private final InetAddress client_address;
-
-    /**
-     * The ServerController's OutputController
-     */
     private final OutputController outputController;
-
-    /**
-     * The connected client's component name
-     */
     private String client_component_name;
-
-    /**
-     * This ServerThread's application coniguration
-     */
     private final ApplicationConfig application_config;
 
     /**
      * Instantiates a ServerThread.
      * @param socket Socket to communicate with client over
      * @param outputController OutputController to queue events in
+     * @param application_config ApplicationConfig to use
      */
     public ServerThread(Socket socket, OutputController outputController, ApplicationConfig application_config) {
         this.socket = socket;
@@ -178,6 +155,5 @@ public class ServerThread extends Thread {
         } catch(IOException e) {
             System.err.println("Failed to close socket.");
         }
-
     }
 }
