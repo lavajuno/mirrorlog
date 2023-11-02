@@ -1,11 +1,10 @@
 package org.lavajuno.mirrorlog.main;
 
 import java.io.IOException;
-import java.util.Scanner;
 import org.lavajuno.mirrorlog.server.ServerController;
 
 /**
- * MirrorLogApplication handles startup and shutdown of the server.
+ * MirrorLogApplication handles startup of the server.
  */
 public class MirrorLogApplication {
 
@@ -15,7 +14,6 @@ public class MirrorLogApplication {
      */
     public static void main(String[] args) {
         ServerController server_controller;
-
         System.out.println("Starting MirrorLog server...");
         try {
             server_controller = new ServerController();
