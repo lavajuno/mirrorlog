@@ -138,13 +138,6 @@ public class ServerThread extends Thread {
                     2,
                     "Client at " + client_address + " disconnected. (IOException)"
             );
-        } catch(Exception e) {
-            outputController.submitEvent(
-                    "Log Server",
-                    2,
-                    "Client at " + client_address + " disconnected. (Uncaught Exception)"
-            );
-            System.err.println(e.getMessage());
         }
     }
 
