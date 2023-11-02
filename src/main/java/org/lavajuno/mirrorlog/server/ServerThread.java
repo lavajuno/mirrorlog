@@ -79,7 +79,7 @@ public class ServerThread extends Thread {
                             outToClient.flush();
                         }
                         // Catch @KeepAlive command
-                        else if(line_str.matches("^@KeepAlive*$")) {
+                        else if(line_str.matches("^@KeepAlive.*$")) {
 
                             outToClient.write("@KeepAlive\r\n".getBytes(StandardCharsets.UTF_8));
                             outToClient.flush();
