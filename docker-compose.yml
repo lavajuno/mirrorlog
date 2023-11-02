@@ -1,0 +1,10 @@
+services:
+  logserver:
+    build: .
+    container_name: mirrorlog
+    ports:
+      - "4001:4357"
+    volumes:
+      - type: bind
+        source: ./logs
+        target: /mirrorlog/logs
