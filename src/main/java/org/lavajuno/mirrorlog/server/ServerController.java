@@ -44,6 +44,7 @@ public class ServerController extends Thread {
         output_controller = new OutputController(application_config);
         threadPool = Executors.newFixedThreadPool(application_config.getThreads());
         socket = new ServerSocket(application_config.getPort());
+        Runtime.getRuntime().addShutdownHook(new Thread(this::interrupt));
     }
 
     @Override
@@ -68,32 +69,23 @@ public class ServerController extends Thread {
 
     @Override
     public void interrupt() {
+        System.out.println("Closing server socket...");
         try {
             socket.close();
         } catch(IOException e) {
             System.err.println("Failed to close server socket. (IOException)");
         }
-    }
 
-    /**
-     * Shuts down the thread pool and stops the server.
-     */
-    public void close() {
-        System.out.println("Sending shutdown signal to thread pool...");
-        threadPool.shutdownNow();
-        System.out.println("Sending shutdown signal to output controller...");
+        System.out.println("Shutting down output controller...");
         output_controller.interrupt();
+
         try {
             output_controller.join(LogMap.IO_SHUTDOWN_TIMEOUT);
+            if(output_controller.isAlive()) {
+                System.out.println("Still waiting on output controller to shut down.");
+            }
         } catch(InterruptedException e) {
             System.err.println("Interrupted while shutting down output controller. Skipping timeout.");
         }
-        if(output_controller.isAlive()) {
-            System.out.println("Waiting on output controller to shut down...");
-        }
-        if(!threadPool.isTerminated()) {
-            System.out.println("Waiting on thread pool to shut down...");
-        }
-
     }
 }

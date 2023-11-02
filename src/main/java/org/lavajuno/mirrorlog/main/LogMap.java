@@ -11,17 +11,12 @@ public class LogMap {
     /**
      * The path to the program's configuration file
      */
-    public static final String CONFIG_FILE_PATH = "mirrorlog.conf.yml";
+    public static final String CONFIG_FILE_PATH = "config/mirrorlog.conf.yml";
 
     /**
      * The size of the input buffer for log events (bytes)
      */
     public static final int INPUT_BUFFER_SIZE = 4096;
-
-    /**
-     * How long MirrorLogApplication should wait for ServerController to shut down (ms)
-     */
-    public static final int SERVER_SHUTDOWN_TIMEOUT = 10000;
 
     /**
      * How long ServerController should wait for OutputController to shut down (ms)

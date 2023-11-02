@@ -52,7 +52,7 @@ server:
   # Should the server ignore requests from unknown addresses? (true/false)
   # -- Example --
   # restricted: true
-  restricted: true
+  restricted: false
 
   # If 'restricted' is true, which addresses should we allow connections from? (list)
   # -- Example --

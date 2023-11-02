@@ -34,6 +34,7 @@ public class ServerThread extends Thread {
         this.client_component_name = "(not specified)";
         this.client_address = socket.getInetAddress();
         this.application_config = application_config;
+        Runtime.getRuntime().addShutdownHook(new Thread(this::interrupt));
     }
 
     @Override
@@ -150,10 +151,10 @@ public class ServerThread extends Thread {
     @Override
     public void interrupt() {
         try {
-            System.out.println("Connection to " + socket.getInetAddress() + " terminated.");
+            System.out.println("Connection to " + socket.getInetAddress() + " terminated. (Shutdown)");
             this.socket.close();
         } catch(IOException e) {
-            System.err.println("Failed to close socket.");
+            System.err.println("Failed to close connection to " + socket.getInetAddress());
         }
     }
 }
