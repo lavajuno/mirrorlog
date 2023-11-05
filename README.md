@@ -36,32 +36,32 @@ To start the server, just run `mirrorlog.jar`.
 
 The server uses a persistent TCP socket. No special action is needed when connecting or disconnecting.
 
-To submit a log event to the server, just send it a sequence of characters followed by `\r\n`.
+To submit a log event to the server, send it the string `@Component@SeverityMessage\r\n`
+where Component is the name of the component logging the message, Severity is a number from 0 to 3,
+and Message is the messaged to be logged. For example, the component "MyComponent" logging
+a message with severity 0 (INFO) would send the following:
+
+`@MyComponent@0This is an example log event.\r\n`
 
 This will log an event with severity 0 (Info), which looks like this:
 
-`2023-10-16 10:30:04 [ INFO ]  ExampleComponentName     : This is an example log event.`
+`2023-10-16 10:30:04 [ INFO ]  MyComponent     : This is an example log event.`
 
-To submit a log event with a different severity, just prepend the message with an integer from 0 to 3.
+To submit a log event with a different severity, change the 0 to 1, 2, or 3 for
+WARN, ERROR, or FATAL respectively.
 
 Examples:
 
-`0My Event\r\n` -> `2023-10-16 10:30:05 [ INFO ]  MyComponentName     : My Event`
+`@MyComponent@0My Event\r\n` -> `2023-10-16 10:30:05 [ INFO ]  MyComponent     : My Event`
 
-`1My Event\r\n` -> `2023-10-16 10:30:06 [ WARN ]  MyComponentName     : My Event`
+`@MyComponent@1My Event\r\n` -> `2023-10-16 10:30:06 [ WARN ]  MyComponent     : My Event`
 
-`2My Event\r\n` -> `2023-10-16 10:30:07 [ ERROR ] MyComponentName     : My Event`
+`@MyComponent@2My Event\r\n` -> `2023-10-16 10:30:07 [ ERROR ] MyComponent     : My Event`
 
-`3My Event\r\n` -> `2023-10-16 10:30:08 [ FATAL ] MyComponentName     : My Event`
+`@MyComponent@3My Event\r\n` -> `2023-10-16 10:30:08 [ FATAL ] MyComponent     : My Event`
 
 When you log an event to the server, it will echo your input to acknowledge that it has received it.
 Incoming events are queued, so you should receive a response from the server quickly, even if it is under load.
-
-To set a component name, send the server the following line: 
-
-`@ComponentName [YourComponentName]\r\n`
-
-The server will then echo the component name you set.
 
 Logs will look best when component names are shorter than the length that they are specified to be padded to in the configuration file. A properly configured log with good component names will look like the following:
 
@@ -72,12 +72,6 @@ Logs will look best when component names are shorter than the length that they a
 2023-10-16 10:30:10 [ WARN ]  AccessControl  : 4 blank parameters found in profile for user "856947126".
 2023-10-16 10:30:10 [ ERROR ] Website        : GET /admin.html 403 FORBIDDEN
 ```
-
-To prevent your connection from timing out, you can periodically send the server a keep-alive ping:
-
-`@KeepAlive\r\n`
-
-The server will echo the above line back to you to indicate that the timeout has been reset.
 
 You can tinker with the server easily using `telnet` (all communication will be human-readable).
 

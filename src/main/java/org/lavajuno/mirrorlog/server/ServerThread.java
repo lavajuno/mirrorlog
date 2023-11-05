@@ -1,6 +1,7 @@
 package org.lavajuno.mirrorlog.server;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -19,7 +20,6 @@ public class ServerThread extends Thread {
     private final Socket socket;
     private final InetAddress client_address;
     private final OutputController outputController;
-    private String client_component_name;
     private final ApplicationConfig application_config;
 
     /**
@@ -31,7 +31,6 @@ public class ServerThread extends Thread {
     public ServerThread(Socket socket, OutputController outputController, ApplicationConfig application_config) {
         this.socket = socket;
         this.outputController = outputController;
-        this.client_component_name = "(not specified)";
         this.client_address = socket.getInetAddress();
         this.application_config = application_config;
         Runtime.getRuntime().addShutdownHook(new Thread(this::interrupt));
@@ -70,40 +69,18 @@ public class ServerThread extends Thread {
                                 Arrays.copyOf(line_buf, line_index),
                                 StandardCharsets.UTF_8
                         );
-                        // Set the severity to default (0)
-                        int severity = 0;
-                        // Catch @ComponentName command
-                        if(line_str.matches("^@ComponentName .{1,128}$")) {
-                            client_component_name = line_str.substring("@ComponentName ".length());
-                            outToClient.write((client_component_name + "\r\n").getBytes(StandardCharsets.UTF_8));
-                            outToClient.flush();
-                        }
-                        // Catch @KeepAlive command
-                        else if(line_str.matches("^@KeepAlive.*$")) {
-
-                            outToClient.write("@KeepAlive\r\n".getBytes(StandardCharsets.UTF_8));
-                            outToClient.flush();
-                        }
-                        // Otherwise, this is a regular log event
-                        else {
-                            // If a severity indicator is included in the event
-                            if(line_str.matches("^[0-3].*$")) {
-                                try {
-                                    severity = Integer.parseInt(line_str.substring(0, 1));
-                                } catch(NumberFormatException e) {
-                                    System.err.println("how");
-                                }
-                                outputController.submitEvent(
-                                        client_component_name,
-                                        severity,
-                                        line_str.substring(1)
-                                );
-                            } else {
-                                // If no severity indicator is included in the event
-                                outputController.submitEvent(client_component_name, severity, line_str);
-                            }
-                            // Acknowledge the request
+                        if(line_str.matches("^@[0-9A-Za-z_-]{1,128}@[0-3].*$")) {
+                            String[] fragments = line_str.split("@", 3);
+                            // Submit log event and respond
+                            outputController.submitEvent(
+                                    fragments[1],
+                                    Integer.parseInt(fragments[2].substring(0, 1)),
+                                    fragments[2].substring(1)
+                            );
                             outToClient.write((line_str + "\r\n").getBytes(StandardCharsets.UTF_8));
+                            outToClient.flush();
+                        } else {
+                            outToClient.write("BAD SYNTAX\r\n".getBytes(StandardCharsets.UTF_8));
                             outToClient.flush();
                         }
                         // Reset the line index when we're done
@@ -114,7 +91,7 @@ public class ServerThread extends Thread {
                     line_buf[line_index] = (byte) next;
                     line_index++;
                     if(line_index >= LogMap.INPUT_BUFFER_SIZE) {
-                        throw new IOException("Bad request.");
+                        throw new IOException("Bad request (Too long).");
                     }
                 }
                 // Read next byte
