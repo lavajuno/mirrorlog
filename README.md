@@ -12,7 +12,7 @@ A customizable, multithreaded log server that provides a lot of functionality in
 ## Features
  - Logging to console and timestamped log files
  - Client-set component names to make searching logs easy
- - Incredibly simple protocol, server is easy to talk to with many programming languages
+ - Simple stateless protocol, server is easy to talk to with many programming languages
  - Configurable duration of each log file
  - Automatic cleaning of old logs, configurable history length
  - Configurable firewall to block unknown IP addresses
