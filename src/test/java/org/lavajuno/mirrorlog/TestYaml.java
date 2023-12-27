@@ -1,10 +1,8 @@
-package src.test;
+package org.lavajuno.mirrorlog;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.lavajuno.mirrorlog.yaml.YamlElement;
-import org.lavajuno.mirrorlog.yaml.YamlList;
-import org.lavajuno.mirrorlog.yaml.YamlValue;
+import org.lavajuno.mirrorlog.yaml.*;
 
 import java.io.IOException;
 import java.util.InvalidPropertiesFormatException;
@@ -19,27 +17,33 @@ public class TestYaml {
     @Test
     public void testBasicYaml() throws IOException {
         Vector<String> test_lines = new Vector<>();
-        test_lines.add("Element1:");
-        test_lines.add("  Element2:");
-        test_lines.add("    -  ListItem1");
-        test_lines.add("    -  \"ListItem2\"");
-        test_lines.add("  Element3: Value3");
-        test_lines.add("  Element4: \"Value4\"");
+        test_lines.add("MapElement1:");
+        test_lines.add("  PairElement1: ValueElement1");
+        test_lines.add("  ListElement1:");
+        test_lines.add("    - ListElement2:");
+        test_lines.add("      - ValueElement2");
+        test_lines.add("    - PairElement2: ValueElement3");
 
-        YamlElement root = new YamlElement(test_lines);
-        YamlElement element_1 = root.getElement("Element1");
-        Assertions.assertNotNull(element_1);
-        YamlList element_2 = (YamlList) element_1.getElement("Element2");
-        Assertions.assertNotNull(element_2);
-        YamlValue element_3 = (YamlValue) element_1.getElement("Element3");
-        Assertions.assertNotNull(element_3);
-        YamlValue element_4 = (YamlValue) element_1.getElement("Element4");
-        Assertions.assertNotNull(element_4);
+        YamlMap root = new YamlMap(test_lines);
+        System.out.println(root.toString());
 
-        Assertions.assertEquals("ListItem1", element_2.getContents().get(0));
-        Assertions.assertEquals("ListItem2", element_2.getContents().get(1));
-        Assertions.assertEquals("Value3", element_3.getContents());
-        Assertions.assertEquals("Value4", element_4.getContents());
+        YamlMap map_element_1 = (YamlMap) root.getElement("MapElement1");
+        YamlPair pair_element_1 = (YamlPair) map_element_1.getElement("PairElement1");
+        YamlValue value_element_1 = pair_element_1.getValue();
+        YamlList list_element_1 = (YamlList) map_element_1.getElement("ListElement1");
+        YamlList list_element_2 = (YamlList) list_element_1.getElement(0);
+        YamlValue value_element_2 = (YamlValue) list_element_2.getElement(0);
+        YamlPair pair_element_2 = (YamlPair) list_element_1.getElement(1);
+        YamlValue value_element_3 = pair_element_2.getValue();
+
+        Assertions.assertEquals("MapElement1", map_element_1.getKey());
+        Assertions.assertEquals("PairElement1", pair_element_1.getKey());
+        Assertions.assertEquals("ValueElement1", value_element_1.toString());
+        Assertions.assertEquals("ListElement1", list_element_1.getKey());
+        Assertions.assertEquals("ListElement2", list_element_2.getKey());
+        Assertions.assertEquals("ValueElement2", value_element_2.toString());
+        Assertions.assertEquals("PairElement2", pair_element_2.getKey());
+        Assertions.assertEquals("ValueElement3", value_element_3.toString());
     }
 
     /**
@@ -53,8 +57,8 @@ public class TestYaml {
         test_lines.add("    Element2:");
         test_lines.add("      Element3:");
 
-        YamlElement root = new YamlElement(test_lines);
-        YamlElement element_1 = root.getElement("Element1");
+        YamlMap root = new YamlMap(test_lines);
+        YamlMap element_1 = (YamlMap) root.getElement("Element1");
         Assertions.assertNotNull(element_1);
         Assertions.assertEquals(element_1.getElements().size(), 0);
     }
@@ -69,12 +73,13 @@ public class TestYaml {
         test_lines.add("Element1:");
         test_lines.add("    Element2:");
         test_lines.add("  Element3:");
+        test_lines.add("    Element4: Value5");
 
-        YamlElement root = new YamlElement(test_lines);
-        YamlElement element_1 = root.getElement("Element1");
+        YamlMap root = new YamlMap(test_lines);
+        YamlMap element_1 = (YamlMap) root.getElement("Element1");
         Assertions.assertNotNull(element_1);
         Assertions.assertEquals(element_1.getElements().size(), 1);
-        YamlElement element_3 = element_1.getElement("Element3");
+        YamlMap element_3 = (YamlMap) element_1.getElement("Element3");
         Assertions.assertNotNull(element_3);
     }
 
@@ -89,24 +94,24 @@ public class TestYaml {
         test_lines.add("Element1:");
         test_lines.add("  not valid");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad key.");
+            new YamlMap(test_lines);
+            throw new IOException("Accepted bad key.");
         } catch(InvalidPropertiesFormatException ignored) {}
         test_lines.clear();
 
         test_lines.add("Element1: ");
         test_lines.add("  :");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad key.");
+            new YamlMap(test_lines);
+            throw new IOException("Accepted bad key.");
         } catch(InvalidPropertiesFormatException ignored) {}
         test_lines.clear();
 
         test_lines.add("Element1  : ");
         test_lines.add("  Element2");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad key.");
+            new YamlMap(test_lines);
+            throw new IOException("Accepted bad key.");
         } catch(InvalidPropertiesFormatException ignored) {}
     }
 
@@ -121,16 +126,16 @@ public class TestYaml {
         test_lines.add("Element1:");
         test_lines.add("  -     ");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad list.");
+            new YamlMap(test_lines);
+            throw new IOException("Accepted bad list.");
         } catch(InvalidPropertiesFormatException ignored) {}
         test_lines.clear();
 
         test_lines.add("Element1: ");
         test_lines.add("  -bad");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad list.");
+            new YamlMap(test_lines);
+            throw new IOException("Accepted bad list.");
         } catch(InvalidPropertiesFormatException ignored) {}
     }
 
@@ -143,8 +148,15 @@ public class TestYaml {
         Vector<String> test_lines = new Vector<>();
         test_lines.add("Element1:bad");
         try {
-            new YamlElement(test_lines);
-            throw new IOException("YamlElement accepted bad string.");
+            new YamlMap(test_lines);
+            throw new IOException("YamlMap accepted bad string.");
+        } catch(InvalidPropertiesFormatException ignored) {}
+
+        test_lines.clear();
+        test_lines.add("-element2bad");
+        try {
+            new YamlMap(test_lines);
+            throw new IOException("YamlMap accepted bad string.");
         } catch(InvalidPropertiesFormatException ignored) {}
     }
 
@@ -162,15 +174,15 @@ public class TestYaml {
         test_lines.add("    port: 1234");
         test_lines.add("    firewall: 0");
         test_lines.add("    allowed_ips:");
-        test_lines.add("    -  10.0.0.1");
-        test_lines.add("    - \"10.0.0.2\"");
+        test_lines.add("      -  10.0.0.1");
+        test_lines.add("      - \"10.0.0.2\"");
         test_lines.add("    container:");
         test_lines.add("      provider: screen");
         test_lines.add("      user: server");
         test_lines.add("      args:");
         test_lines.add("        - arg1");
 
-        YamlElement root = new YamlElement(test_lines);
+        YamlMap root = new YamlMap(test_lines);
         System.out.println(root);
     }
 }

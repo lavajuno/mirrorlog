@@ -1,51 +1,55 @@
 package org.lavajuno.mirrorlog.yaml;
 
 /**
- * YamlValue is a YamlElement that contains a String.
- * A YamlValue never has children (YamlValue.getElements() will always be null).
+ * YamlValue represents a string or numeric value.
  */
 public class YamlValue extends YamlElement {
-    /**
-     * The contents of this YamlValue
-     */
-    private final String CONTENTS;
+    private final String STR_VALUE;
 
     /**
-     * Constructs a YamlValue from a line of YAML.
-     * We assume that we have checked the input line to make sure it actually contains
-     * a value, otherwise this function may behave unexpectedly.
-     * @param line Line of YAML to parse
+     * Constructs a YamlValue from a string.
+     * @param raw String value of this YamlValue
      */
-    YamlValue(String key, String line) {
-        /* Construct superclass with only key */
-        super(key);
-        /* Parse line and set value accordingly */
-        String value = line.split(": ", 2)[1];
-        String head = value.substring(0, 1);
-        String tail = value.substring(value.length() - 1);
-        /* Trim quotes if they exist */
-        if((head.equals("\"") && tail.equals("\"")) ||
-                (head.equals("'") && tail.equals("'"))) {
-            CONTENTS = value.substring(1, value.length() - 1);
+    protected YamlValue(String raw) {
+        if(raw.matches("^\".*\"$")) {
+            STR_VALUE = raw.substring(1, raw.length() - 1);
         } else {
-            CONTENTS = value;
+            STR_VALUE = raw;
         }
     }
 
     /**
-     * This YamlValue's contents.
-     * @return This YamlValue's contents.
+     * @return Integer value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to an Integer
      */
-    public String getContents() { return CONTENTS; }
+    public int toInt() throws NumberFormatException { return Integer.parseInt(STR_VALUE); }
 
-    @Override
-    String toString(int indent) {
+    /**
+     * @return Long value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Long
+     */
+    public long toLong() throws NumberFormatException { return Long.parseLong(STR_VALUE); }
+
+    /**
+     * @return Float value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Float
+     */
+    public float toFloat() throws NumberFormatException { return Float.parseFloat(STR_VALUE); }
+
+    /**
+     * @return Double value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Double
+     */
+    public double toDouble() throws NumberFormatException { return Double.parseDouble(STR_VALUE); }
+
+    protected String toString(int indent, boolean list) {
+        if(!list) { return STR_VALUE; }
         StringBuilder sb = new StringBuilder();
-        String indent_prefix = " ".repeat(indent);
-        sb.append(indent_prefix).append(this.KEY).append(": ").append(this.CONTENTS).append("\n");
+        sb.append(" ".repeat(indent)).append("- ");
+        sb.append(STR_VALUE).append("\n");
         return sb.toString();
     }
 
     @Override
-    public String toString() { return this.toString(0); }
+    public String toString() { return this.toString(0, false); }
 }

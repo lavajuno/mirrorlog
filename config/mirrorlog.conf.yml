@@ -2,13 +2,14 @@
 # Configuration file for MirrorLog
 
 # Please note that the YAML parser is very small and has some limitations:
-#   1- Lists must be in multiple-line form, and can only contain values.
+#   1- Lists must be in multiple-line form with proper indentation.
 #     This will work:
 #       MyList:
-#       - MyValue
+#         - MyValue
 #     This will NOT work:
+#       MyList: [MyValue]
 #       MyList:
-#       - MyElement: MyValue
+#       - MyValue
 #   2- Values must be a single line, spanning & folding are not recognized.
 #   However, escape characters will be preserved, so you can make newlines this way.
 #     This will work:
