@@ -31,21 +31,21 @@ public abstract class YamlElement {
         IGNORE, ELEMENT, PAIR, LIST_ELEMENT, LIST_PAIR, LIST_VALUE, NONE
     }
 
-    protected static YamlElement parseElement(List<String> lines, int begin, Integer end, int indent)
+    protected static YamlElement parseElement(String key, List<String> lines, int begin, Integer end, int indent)
         throws InvalidPropertiesFormatException {
-        int i = begin;
+        int i = begin + 1;
         for(; i < lines.size(); i++) {
             if(!lines.get(i).matches(IGNORE_RGX)) { break; }
         }
+        if (i >= lines.size()) {
+            throw new InvalidPropertiesFormatException("Reached end of input.");
+        }
         return switch (matchLine(lines.get(i))) {
-            case ELEMENT, PAIR -> new YamlMap(lines, i, end, indent);
-            case LIST_ELEMENT, LIST_PAIR, LIST_VALUE -> new YamlList(lines, i, end, indent + 2);
+            case LIST_ELEMENT, LIST_PAIR, LIST_VALUE -> new YamlList(key, lines, i, end, indent);
+            case ELEMENT, PAIR -> new YamlMap(key, lines, i, end, indent);
             default -> {
-                System.err.println("vvv  YAML - Error on line:  vvv");
-                System.err.println(lines.get(i));
-                System.err.println("^^^  ---------------------  ^^^");
-                System.err.println("(Line " + i + " of input.)");
-                throw new InvalidPropertiesFormatException("Syntax error on line " + i + ".");
+                printParseError(lines.get(i), i, "Unexpected line.");
+                throw new InvalidPropertiesFormatException("Parse error on line " + i + ".");
             }
         };
     }
@@ -88,6 +88,20 @@ public abstract class YamlElement {
      */
     protected static int parseIndent(String line) { return line.length() - line.stripLeading().length(); }
 
-    public abstract String toString(int indent);
+    /**
+     * Prints a parse error to stderr.
+     * @param line Line to show in the message
+     * @param line_index Line index to show in the message
+     * @param explanation Explanation to show in the message
+     */
+    protected static void printParseError(String line, int line_index, String explanation) {
+        System.err.println("vvv  YAML - Parse error on line:  vvv");
+        System.err.println(line);
+        System.err.println("^^^  ---------------------------  ^^^");
+        System.err.println("(Line " + line_index + " of input.)");
+        System.err.println(explanation + "\n"); /* extra newline */
+    }
+
+    protected abstract String toString(int indent, boolean list);
 
 }

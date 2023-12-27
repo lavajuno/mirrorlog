@@ -1,7 +1,7 @@
 package org.lavajuno.mirrorlog.yaml2;
 
 /**
- * Represents a string or numeric value.
+ * YamlValue represents a string or numeric value.
  */
 public class YamlValue extends YamlElement {
     private final String STR_VALUE;
@@ -18,18 +18,43 @@ public class YamlValue extends YamlElement {
         }
     }
 
-    public String getString() { return STR_VALUE; }
+    /**
+     * @return Integer value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to an Integer
+     */
+    public int toInt() throws NumberFormatException { return Integer.parseInt(STR_VALUE); }
 
-    public int getInt() throws NumberFormatException { return Integer.parseInt(STR_VALUE); }
+    /**
+     * @return Long value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Long
+     */
+    public long toLong() throws NumberFormatException { return Long.parseLong(STR_VALUE); }
 
-    public long getLong() throws NumberFormatException { return Long.parseLong(STR_VALUE); }
+    /**
+     * @return Float value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Float
+     */
+    public float toFloat() throws NumberFormatException { return Float.parseFloat(STR_VALUE); }
 
-    public float getFloat() throws NumberFormatException { return Float.parseFloat(STR_VALUE); }
+    /**
+     * @return Double value of this YamlValue
+     * @throws NumberFormatException If this YamlValue cannot be converted to a Double
+     */
+    public double toDouble() throws NumberFormatException { return Double.parseDouble(STR_VALUE); }
 
-    public double getDouble() throws NumberFormatException { return Double.parseDouble(STR_VALUE); }
-
-    public String toString(int indent) { return STR_VALUE; }
+    /**
+     * @param indent (Ignored) Indent to print with
+     * @param list (Ignored) Whether to print as part of a list
+     * @return This YamlValue as a String
+     */
+    protected String toString(int indent, boolean list) {
+        if(!list) { return STR_VALUE; }
+        StringBuilder sb = new StringBuilder();
+        sb.append(" ".repeat(indent)).append("- ");
+        sb.append(STR_VALUE).append("\n");
+        return sb.toString();
+    }
 
     @Override
-    public String toString() { return this.toString(0); }
+    public String toString() { return this.toString(0, false); }
 }
