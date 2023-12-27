@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.yaml2;
+package org.lavajuno.mirrorlog.yaml;
 
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;

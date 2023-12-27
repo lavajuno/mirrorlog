@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.yaml2;
+package org.lavajuno.mirrorlog.yaml;
 
 /**
  * YamlPair represents an element containing a key-value pair.

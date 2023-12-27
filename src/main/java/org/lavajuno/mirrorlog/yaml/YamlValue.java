@@ -1,4 +1,4 @@
-package org.lavajuno.mirrorlog.yaml2;
+package org.lavajuno.mirrorlog.yaml;
 
 /**
  * YamlValue represents a string or numeric value.

@@ -2,7 +2,7 @@ package org.lavajuno.mirrorlog;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.lavajuno.mirrorlog.yaml2.*;
+import org.lavajuno.mirrorlog.yaml.*;
 
 import java.io.IOException;
 import java.util.InvalidPropertiesFormatException;

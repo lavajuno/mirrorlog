@@ -1,7 +1,6 @@
 package org.lavajuno.mirrorlog.config;
 
-import org.lavajuno.mirrorlog.yaml.YamlElementOld;
-import org.lavajuno.mirrorlog.yaml.YamlValueOld;
+import org.lavajuno.mirrorlog.yaml.*;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -38,61 +37,61 @@ public class ApplicationConfig {
      */
     public ApplicationConfig(String config_file_path) throws IOException {
         /* Parse configuration file */
-        final YamlElementOld config_root = new YamlElementOld(readLinesFromFile(config_file_path));
+        final YamlMap config_root = new YamlMap(readLinesFromFile(config_file_path));
 
         /* Get configuration revision */
-        final YamlValueOld config_revision = (YamlValueOld) config_root.getElement("revision");
+        final YamlValue config_revision = ((YamlPair) config_root.getElement("revision")).getValue();
 
         /* Get server configuration */
-        final YamlElementOld config_server = config_root.getElement("server");
-        final YamlValueOld config_threads = (YamlValueOld) config_server.getElement("threads");
-        final YamlValueOld config_port = (YamlValueOld) config_server.getElement("port");
-        final YamlValueOld config_timeout = (YamlValueOld) config_server.getElement("timeout");
-        final YamlValueOld config_restricted = (YamlValueOld) config_server.getElement("restricted");
-        final YamlElementOld config_addresses = config_server.getElement("allowed_addresses");
+        final YamlMap config_server = (YamlMap) config_root.getElement("server");
+        final YamlValue config_threads = ((YamlPair) config_server.getElement("threads")).getValue();
+        final YamlValue config_port = ((YamlPair) config_server.getElement("port")).getValue();
+        final YamlValue config_timeout = ((YamlPair) config_server.getElement("timeout")).getValue();
+        final YamlValue config_restricted = ((YamlPair) config_server.getElement("restricted")).getValue();
+        final YamlList config_addresses = (YamlList) config_server.getElement("allowed_addresses");
 
         /* Get log file configuration */
-        final YamlElementOld config_output = config_root.getElement("output");
-        final YamlValueOld config_component_pad = (YamlValueOld) config_output.getElement("component_pad");
-        final YamlValueOld config_log_to_file = (YamlValueOld) config_output.getElement("log_to_file");
-        final YamlValueOld config_file_duration = (YamlValueOld) config_output.getElement("file_duration");
-        final YamlValueOld config_file_history = (YamlValueOld) config_output.getElement("file_history");
+        final YamlMap config_output = (YamlMap) config_root.getElement("output");
+        final YamlValue config_component_pad = ((YamlPair) config_output.getElement("component_pad")).getValue();
+        final YamlValue config_log_to_file = ((YamlPair) config_output.getElement("log_to_file")).getValue();
+        final YamlValue config_file_duration = ((YamlPair) config_output.getElement("file_duration")).getValue();
+        final YamlValue config_file_history = ((YamlPair) config_output.getElement("file_history")).getValue();
 
         /* Read in and set configuration values */
         try {
-            this.revision = Integer.parseInt(config_revision.getContents());
+            this.revision = config_revision.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"version\".");
             throw new IOException("Illegal value for key \"version\".");
         }
 
         try {
-            this.threads = Integer.parseInt(config_threads.getContents());
+            this.threads = config_threads.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"threads\".");
             throw new IOException("Illegal value for key \"threads\".");
         }
 
         try {
-            this.port = Integer.parseInt(config_port.getContents());
+            this.port = config_port.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"port\".");
             throw new IOException("Illegal value for key \"port\".");
         }
 
         try {
-            this.timeout = Integer.parseInt(config_timeout.getContents());
+            this.timeout = config_timeout.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"timeout\".");
             throw new IOException("Illegal value for key \"timeout\".");
         }
 
-        this.restricted = Boolean.parseBoolean(config_restricted.getContents());
+        this.restricted = Boolean.parseBoolean(config_restricted.toString());
 
         allowed_addresses = new Vector<>();
         try {
-            for(YamlElementOld i : config_addresses.getElements()) {
-                allowed_addresses.add(InetAddress.getByName( ((YamlValueOld) i).getContents()) );
+            for(YamlElement i : config_addresses.getElements()) {
+                allowed_addresses.add(InetAddress.getByName( i.toString()) );
             }
         } catch(UnknownHostException e) {
             System.err.println("Illegal value for key \"allowed_addresses\".");
@@ -100,23 +99,23 @@ public class ApplicationConfig {
         }
 
         try {
-            this.component_pad = Integer.parseInt(config_component_pad.getContents());
+            this.component_pad = config_component_pad.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"component_pad\".");
             throw new IOException("Illegal value for key \"component_pad\".");
         }
 
-        this.log_to_file = Boolean.parseBoolean(config_log_to_file.getContents());
+        this.log_to_file = Boolean.parseBoolean(config_log_to_file.toString());
 
         try {
-            this.file_duration = Integer.parseInt(config_file_duration.getContents());
+            this.file_duration = config_file_duration.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"file_duration\".");
             throw new IOException("Illegal value for key \"file_duration\".");
         }
 
         try {
-            this.file_history = Integer.parseInt(config_file_history.getContents());
+            this.file_history = config_file_history.toInt();
         } catch(NumberFormatException e) {
             System.err.println("Illegal value for key \"file_history\".");
             throw new IOException("Illegal value for key \"file_history\".");
