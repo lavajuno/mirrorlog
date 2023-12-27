@@ -1,8 +1,7 @@
 package org.lavajuno.mirrorlog.config;
 
-import org.lavajuno.mirrorlog.yaml.YamlElement;
-import org.lavajuno.mirrorlog.yaml.YamlList;
-import org.lavajuno.mirrorlog.yaml.YamlValue;
+import org.lavajuno.mirrorlog.yaml.YamlElementOld;
+import org.lavajuno.mirrorlog.yaml.YamlValueOld;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -39,25 +38,25 @@ public class ApplicationConfig {
      */
     public ApplicationConfig(String config_file_path) throws IOException {
         /* Parse configuration file */
-        final YamlElement config_root = new YamlElement(readLinesFromFile(config_file_path));
+        final YamlElementOld config_root = new YamlElementOld(readLinesFromFile(config_file_path));
 
         /* Get configuration revision */
-        final YamlValue config_revision = (YamlValue) config_root.getElement("revision");
+        final YamlValueOld config_revision = (YamlValueOld) config_root.getElement("revision");
 
         /* Get server configuration */
-        final YamlElement config_server = config_root.getElement("server");
-        final YamlValue config_threads = (YamlValue) config_server.getElement("threads");
-        final YamlValue config_port = (YamlValue) config_server.getElement("port");
-        final YamlValue config_timeout = (YamlValue) config_server.getElement("timeout");
-        final YamlValue config_restricted = (YamlValue) config_server.getElement("restricted");
-        final YamlList config_addresses = (YamlList) config_server.getElement("allowed_addresses");
+        final YamlElementOld config_server = config_root.getElement("server");
+        final YamlValueOld config_threads = (YamlValueOld) config_server.getElement("threads");
+        final YamlValueOld config_port = (YamlValueOld) config_server.getElement("port");
+        final YamlValueOld config_timeout = (YamlValueOld) config_server.getElement("timeout");
+        final YamlValueOld config_restricted = (YamlValueOld) config_server.getElement("restricted");
+        final YamlElementOld config_addresses = config_server.getElement("allowed_addresses");
 
         /* Get log file configuration */
-        final YamlElement config_output = config_root.getElement("output");
-        final YamlValue config_component_pad = (YamlValue) config_output.getElement("component_pad");
-        final YamlValue config_log_to_file = (YamlValue) config_output.getElement("log_to_file");
-        final YamlValue config_file_duration = (YamlValue) config_output.getElement("file_duration");
-        final YamlValue config_file_history = (YamlValue) config_output.getElement("file_history");
+        final YamlElementOld config_output = config_root.getElement("output");
+        final YamlValueOld config_component_pad = (YamlValueOld) config_output.getElement("component_pad");
+        final YamlValueOld config_log_to_file = (YamlValueOld) config_output.getElement("log_to_file");
+        final YamlValueOld config_file_duration = (YamlValueOld) config_output.getElement("file_duration");
+        final YamlValueOld config_file_history = (YamlValueOld) config_output.getElement("file_history");
 
         /* Read in and set configuration values */
         try {
@@ -92,8 +91,8 @@ public class ApplicationConfig {
 
         allowed_addresses = new Vector<>();
         try {
-            for(String i : config_addresses.getContents()) {
-                allowed_addresses.add(InetAddress.getByName(i));
+            for(YamlElementOld i : config_addresses.getElements()) {
+                allowed_addresses.add(InetAddress.getByName( ((YamlValueOld) i).getContents()) );
             }
         } catch(UnknownHostException e) {
             System.err.println("Illegal value for key \"allowed_addresses\".");

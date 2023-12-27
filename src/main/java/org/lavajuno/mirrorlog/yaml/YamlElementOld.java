@@ -17,32 +17,32 @@ import java.util.*;
  * to access individual elements. You can also access all elements as a Collection.
  */
 @SuppressWarnings("unused")
-public class YamlElement {
+public class YamlElementOld {
     /**
      * Matches lines to ignore (blank or commented)
      */
     static final String IGNORE_RGX = "^( *#.*)|( *)$";
 
     /**
-     * Matches lines containing an element or list head (ex. "ElementName: ")
+     * Matches lines containing an element (ex. "ElementName: ")
      */
-    static final String ELEMENT_RGX =  "^ *[A-Za-z0-9_-]+: *$";
+    static final String ELEMENT_RGX =  "^ *(- +)?[A-Za-z0-9_-]+: *$";
 
     /**
-     * Matches lines containing a value (ex. "ElementName: ElementValue")
+     * Matches lines containing a key-value pair (ex. "ElementName: ElementValue")
      */
-    static final String STRING_RGX = "^ *[A-Za-z0-9_-]+: +.+$";
+    static final String PAIR_RGX = "^ *(- +)?[A-Za-z0-9_-]+: +.+$";
 
     /**
-     * Matches lines containing a list entry (ex. "  - ListItem1")
+     * Matches lines containing a list item (ex. "  - ListItem")
      */
-    static final String LIST_ENTRY_RGX = "^ *- +[^ ].+$";
+    static final String LIST_RGX = "^ *- +[^ ].+$";
 
     /**
      * Possible matches for a line
      */
     private enum LINE_MATCHES {
-        IGNORE, ELEMENT, STRING, LIST_ENTRY, NONE
+        IGNORE, ELEMENT, PAIR, LIST_ELEMENT, LIST_PAIR, LIST_VALUE, NONE
     }
 
     /**
@@ -53,7 +53,7 @@ public class YamlElement {
     /**
      * This YamlElement's contained YamlElements
      */
-    protected final TreeMap<String, YamlElement> ELEMENTS;
+    protected final TreeMap<String, YamlElementOld> ELEMENTS;
 
     /**
      * Constructs a YamlElement by recursively parsing lines of YAML into a structure of YamlElements.
@@ -61,7 +61,7 @@ public class YamlElement {
      * @param lines Lines of YAML to parse
      * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
      */
-    public YamlElement(List<String> lines) throws InvalidPropertiesFormatException {
+    public YamlElementOld(List<String> lines) throws InvalidPropertiesFormatException {
         this("root", lines, 0, lines.size(), 0);
     }
 
@@ -70,7 +70,7 @@ public class YamlElement {
      * Used by base-case inheritors of YamlElement.
      * @param key this YamlElement's key
      */
-    YamlElement(String key) {
+    YamlElementOld(String key) {
         this.KEY = key;
         this.ELEMENTS = null;
     }
@@ -84,10 +84,11 @@ public class YamlElement {
      * @param indent The indent of the block to parse
      * @throws InvalidPropertiesFormatException If YAML is invalid or the parser cannot continue
      */
-    YamlElement(String key, List<String> lines, int begin, int end, int indent)
+    YamlElementOld(String key, List<String> lines, int begin, int end, int indent)
             throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new TreeMap<>();
+        int list_index = 0;
         for(int i = begin; i < end; i++) {
             String line = lines.get(i);                /* Current line */
             int line_indent = parseIndent(line);       /* How indented this line is */
@@ -95,24 +96,28 @@ public class YamlElement {
             /* If this line's indent matches that of our indented block */
             if(line_indent == indent) {
                 /* If there is a syntax error in this line, output will be ignored. */
-                String k = parseKey(line);
+                String curr_key = parseKey(line);
                 switch(line_match) {
                     case ELEMENT:
-                        /* If the line is the head of a list */
-                        if (i + 1 < end && lines.get(i + 1).matches(LIST_ENTRY_RGX)) {
-                            ELEMENTS.put(k, new YamlList(k, lines, i + 1, end));
-                        }
-                        /* If the line is an element with 0 or more children */
-                        else {
-                            ELEMENTS.put(k, new YamlElement(k, lines, i + 1, end, indent + 2));
-                        }
+                        /* Unordered map of elements */
+                        ELEMENTS.put(curr_key, new YamlElementOld(curr_key, lines, i + 1, end, indent + 2));
                         break;
-                    case STRING:
-                        /* If the line is an element with just a string */
-                        ELEMENTS.put(k, new YamlValue(k, line));
+                    case PAIR:
+                        /* Key-value pair */
+                        ELEMENTS.put(curr_key, new YamlValueOld(curr_key, line, false));
                         break;
-                    case LIST_ENTRY:
+                    case LIST_ELEMENT:
+                        /* Ordered list of elements */
+                        curr_key = Integer.toString(list_index);
+                        ELEMENTS.put(curr_key, new YamlElementOld(curr_key, lines, i + 1, end, indent + 4));
+                        list_index++;
                         break;
+                    case LIST_PAIR:
+                        break;
+                    case LIST_VALUE:
+                        curr_key = Integer.toString(list_index);
+                        ELEMENTS.put(curr_key, new YamlValueOld(curr_key, line, true));
+
                     case NONE:
                         /* If no match was found, we don't know what to do with the line */
                         System.err.println("vv  YamlElement: Syntax error on line:  vv");
@@ -143,13 +148,13 @@ public class YamlElement {
      * @param key The key to match
      * @return The element with the given key (or null if none is found)
      */
-    public YamlElement getElement(String key) { return ELEMENTS.get(key); }
+    public YamlElementOld getElement(String key) { return ELEMENTS.get(key); }
 
     /**
      * Returns this YamlElement's contained elements.
      * @return This YamlElement's contained elements.
      */
-    public Collection<YamlElement> getElements() { return ELEMENTS.values(); }
+    public Collection<YamlElementOld> getElements() { return ELEMENTS.values(); }
 
     /**
      * Parses a line to return the key it contains.
@@ -173,17 +178,19 @@ public class YamlElement {
      * @return Category this line is matched to (can be NONE)
      */
     static LINE_MATCHES matchLine(String line) {
-        if(line.matches(IGNORE_RGX)) {
-            return LINE_MATCHES.IGNORE;
-        } else if(line.matches(ELEMENT_RGX)) {
-            return LINE_MATCHES.ELEMENT;
-        } else if(line.matches(STRING_RGX)) {
-            return LINE_MATCHES.STRING;
-        } else if(line.matches(LIST_ENTRY_RGX)) {
-            return LINE_MATCHES.LIST_ENTRY;
-        } else {
-            return LINE_MATCHES.NONE;
+        /* Filter comments and blank lines */
+        if(line.matches(IGNORE_RGX)) { return LINE_MATCHES.IGNORE; }
+        /* Ordered list elements */
+        if(line.matches(LIST_RGX)) {
+            if(line.matches(ELEMENT_RGX)) { return LINE_MATCHES.LIST_ELEMENT; }
+            if(line.matches(PAIR_RGX)) { return LINE_MATCHES.LIST_PAIR; }
+            return LINE_MATCHES.LIST_VALUE;
         }
+        /* Unordered map elements */
+        if(line.matches(ELEMENT_RGX)) { return LINE_MATCHES.ELEMENT; }
+        if(line.matches(PAIR_RGX)) { return LINE_MATCHES.PAIR; }
+        /* No match */
+        return LINE_MATCHES.NONE;
     }
 
     /**
@@ -195,7 +202,7 @@ public class YamlElement {
         StringBuilder sb = new StringBuilder();
         String indent_prefix = " ".repeat(indent);
         sb.append(indent_prefix).append(this.KEY).append(":\n");
-        for(YamlElement i : this.ELEMENTS.values()) {
+        for(YamlElementOld i : this.ELEMENTS.values()) {
             sb.append(i.toString(indent + 2));
         }
         return sb.toString();

@@ -4,7 +4,7 @@ package org.lavajuno.mirrorlog.yaml;
  * YamlValue is a YamlElement that contains a String.
  * A YamlValue never has children (YamlValue.getElements() will always be null).
  */
-public class YamlValue extends YamlElement {
+public class YamlValueOld extends YamlElementOld {
     /**
      * The contents of this YamlValue
      */
@@ -14,10 +14,11 @@ public class YamlValue extends YamlElement {
      * Constructs a YamlValue from a line of YAML.
      * We assume that we have checked the input line to make sure it actually contains
      * a value, otherwise this function may behave unexpectedly.
+     * @param key Key of this YAMLValue
      * @param line Line of YAML to parse
+     * @param list Whether this value should be parsed as part of a list
      */
-    YamlValue(String key, String line) {
-        /* Construct superclass with only key */
+    YamlValueOld(String key, String line, boolean list) {
         super(key);
         /* Parse line and set value accordingly */
         String value = line.split(": ", 2)[1];
