@@ -43,12 +43,11 @@ public abstract class YamlElement {
      * @param key Key for the new element
      * @param lines Lines we are parsing
      * @param begin Where to begin parsing
-     * @param end This will be set to where we stop parsing
      * @param indent Indent of the new element's elements
      * @return A new YamlElement. (Either a YamlList or a YamlMap)
      * @throws InvalidPropertiesFormatException If an error is encountered while parsing
      */
-    protected static YamlElement parseElement(String key, List<String> lines, int begin, Integer end, int indent)
+    protected static YamlElement parseElement(String key, List<String> lines, int begin, int indent)
         throws InvalidPropertiesFormatException {
         int i = begin + 1;
         for(; i < lines.size(); i++) {
@@ -58,8 +57,8 @@ public abstract class YamlElement {
             throw new InvalidPropertiesFormatException("Reached end of input.");
         }
         return switch (matchLine(lines.get(i))) {
-            case LIST_ELEMENT, LIST_PAIR, LIST_VALUE -> new YamlList(key, lines, i, end, indent);
-            case ELEMENT, PAIR -> new YamlMap(key, lines, i, end, indent);
+            case LIST_ELEMENT, LIST_PAIR, LIST_VALUE -> new YamlList(key, lines, i, indent);
+            case ELEMENT, PAIR -> new YamlMap(key, lines, i, indent);
             default -> {
                 printParseError(lines.get(i), i, "Unexpected line.");
                 throw new InvalidPropertiesFormatException("Parse error on line " + i + ".");

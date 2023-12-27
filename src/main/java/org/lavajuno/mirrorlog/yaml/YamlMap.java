@@ -15,7 +15,7 @@ public class YamlMap extends YamlElement {
      * @throws InvalidPropertiesFormatException If an error is encountered while parsing
      */
     public YamlMap(List<String> lines) throws InvalidPropertiesFormatException {
-        this("root", lines, 0, 0, 0);
+        this("root", lines, 0, 0);
     }
 
     /**
@@ -23,11 +23,10 @@ public class YamlMap extends YamlElement {
      * @param key This YamlMap's key
      * @param lines Input we are parsing
      * @param begin Where to begin parsing
-     * @param end This will be set to where we stop parsing
      * @param indent Indent of this YamlMap's elements
      * @throws InvalidPropertiesFormatException If an error is encountered while parsing
      */
-    protected YamlMap(String key, List<String> lines, int begin, Integer end, int indent) throws InvalidPropertiesFormatException {
+    protected YamlMap(String key, List<String> lines, int begin, int indent) throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new TreeMap<>();
         for(int i = begin; i < lines.size(); i++) {
@@ -40,7 +39,7 @@ public class YamlMap extends YamlElement {
                 switch(line_match) {
                     case ELEMENT:
                         curr_key = parseKey(line);
-                        ELEMENTS.put(curr_key, parseElement(curr_key, lines, i, end, indent + 2));
+                        ELEMENTS.put(curr_key, parseElement(curr_key, lines, i, indent + 2));
                         break;
                     case PAIR:
                         curr_key = parseKey(line);

@@ -15,11 +15,10 @@ public class YamlList extends YamlElement {
      * @param key This YamlMap's key
      * @param lines Input we are parsing
      * @param begin Where to begin parsing
-     * @param end This will be set to where we stop parsing
      * @param indent Indent of this YamlMap's elements
      * @throws InvalidPropertiesFormatException If an error is encountered while parsing
      */
-    protected YamlList(String key, List<String> lines, int begin, Integer end, int indent) throws InvalidPropertiesFormatException {
+    protected YamlList(String key, List<String> lines, int begin, int indent) throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new Vector<>();
 
@@ -32,7 +31,7 @@ public class YamlList extends YamlElement {
                 switch(line_match) {
                     case LIST_ELEMENT:
                         String curr_key = parseKey(line.split("-", 2)[1]);
-                        ELEMENTS.add(parseElement(curr_key, lines, i, end, indent + 2));
+                        ELEMENTS.add(parseElement(curr_key, lines, i, indent + 2));
                         break;
                     case LIST_PAIR:
                         ELEMENTS.add(new YamlPair(line.split("-", 2)[1].stripLeading()));
