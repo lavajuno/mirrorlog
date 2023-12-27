@@ -6,11 +6,27 @@ import java.util.*;
  * YamlMap represents an element containing an unordered map of elements.
  */
 public class YamlMap extends YamlElement {
-
     protected final String KEY;
-
     protected final TreeMap<String, YamlElement> ELEMENTS;
 
+    /**
+     * Constructs a YamlMap by parsing the input.
+     * @param lines YAML to parse
+     * @throws InvalidPropertiesFormatException If an error is encountered while parsing
+     */
+    public YamlMap(List<String> lines) throws InvalidPropertiesFormatException {
+        this("root", lines, 0, 0, 0);
+    }
+
+    /**
+     * Constructs a YamlMap.
+     * @param key This YamlMap's key
+     * @param lines Input we are parsing
+     * @param begin Where to begin parsing
+     * @param end This will be set to where we stop parsing
+     * @param indent Indent of this YamlMap's elements
+     * @throws InvalidPropertiesFormatException If an error is encountered while parsing
+     */
     protected YamlMap(String key, List<String> lines, int begin, Integer end, int indent) throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new TreeMap<>();
@@ -44,16 +60,20 @@ public class YamlMap extends YamlElement {
         }
     }
 
-    public YamlMap(List<String> lines) throws InvalidPropertiesFormatException {
-        this("root", lines, 0, 0, 0);
-    }
-
+    /**
+     * @return This YamlMap's key
+     */
     public String getKey() { return KEY; }
 
+    /**
+     * @return A key-value map of this YamlMap's elements
+     */
     public Map<String, YamlElement> getElements() { return ELEMENTS; }
 
-    public Set<String> getKeys() { return ELEMENTS.keySet(); }
-
+    /**
+     * @param key Key of the element to get
+     * @return Gets the element with the specified key
+     */
     public YamlElement getElement(String key) { return ELEMENTS.get(key); }
 
     protected String toString(int indent, boolean list) {

@@ -5,14 +5,20 @@ import java.util.Vector;
 import java.util.List;
 
 /**
- * Represents an element containing an ordered list of elements.
+ * YamlList represents an element containing an ordered list of elements.
  */
 public class YamlList extends YamlElement {
-
     protected final String KEY;
-
     protected final Vector<YamlElement> ELEMENTS;
-
+    /**
+     * Constructs a YamlMap.
+     * @param key This YamlMap's key
+     * @param lines Input we are parsing
+     * @param begin Where to begin parsing
+     * @param end This will be set to where we stop parsing
+     * @param indent Indent of this YamlMap's elements
+     * @throws InvalidPropertiesFormatException If an error is encountered while parsing
+     */
     protected YamlList(String key, List<String> lines, int begin, Integer end, int indent) throws InvalidPropertiesFormatException {
         this.KEY = key;
         this.ELEMENTS = new Vector<>();
@@ -48,12 +54,25 @@ public class YamlList extends YamlElement {
         }
     }
 
+    /**
+     * @return This YamlList's key
+     */
     public String getKey() { return KEY; }
 
+    /**
+     * @return This YamlList's elements
+     */
     public List<YamlElement> getElements() { return ELEMENTS; }
 
+    /**
+     * @param index Index of the element to get
+     * @return Gets the element at the specified index
+     */
     public YamlElement getElement(int index) { return ELEMENTS.get(index); }
 
+    /**
+     * @return The number of elements in this YamlList
+     */
     public int getSize() { return ELEMENTS.size(); }
 
     protected String toString(int indent, boolean list) {

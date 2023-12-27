@@ -28,11 +28,6 @@ public class YamlPair extends YamlElement {
      */
     public String getKey() { return KEY; }
 
-    /**
-     * @param indent Indent to print with
-     * @param list Whether to print as part of a list
-     * @return This YamlPair as a String.
-     */
     protected String toString(int indent, boolean list) {
         StringBuilder sb = new StringBuilder();
         sb.append(" ".repeat(indent));

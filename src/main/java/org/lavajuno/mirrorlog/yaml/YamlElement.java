@@ -3,6 +3,13 @@ package org.lavajuno.mirrorlog.yaml;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 
+/**
+ * YamlElement represents a single YAML element that can contain one of the following:
+ *  - An ordered list of elements
+ *  - An unordered map of elements
+ *  - A key-value pair
+ *  - A value by itself
+ */
 public abstract class YamlElement {
     /**
      * Matches lines to ignore (blank or commented)
@@ -31,6 +38,16 @@ public abstract class YamlElement {
         IGNORE, ELEMENT, PAIR, LIST_ELEMENT, LIST_PAIR, LIST_VALUE, NONE
     }
 
+    /**
+     * Constructs and returns a list/map element dependent on the input.
+     * @param key Key for the new element
+     * @param lines Lines we are parsing
+     * @param begin Where to begin parsing
+     * @param end This will be set to where we stop parsing
+     * @param indent Indent of the new element's elements
+     * @return A new YamlElement. (Either a YamlList or a YamlMap)
+     * @throws InvalidPropertiesFormatException If an error is encountered while parsing
+     */
     protected static YamlElement parseElement(String key, List<String> lines, int begin, Integer end, int indent)
         throws InvalidPropertiesFormatException {
         int i = begin + 1;
@@ -49,7 +66,6 @@ public abstract class YamlElement {
             }
         };
     }
-
 
     /**
      * Matches a line to a predefined category
@@ -102,6 +118,10 @@ public abstract class YamlElement {
         System.err.println(explanation + "\n"); /* extra newline */
     }
 
+    /**
+     * @param indent Indent of this element
+     * @param list Whether this element is a list entry
+     * @return This element as a String
+     */
     protected abstract String toString(int indent, boolean list);
-
 }

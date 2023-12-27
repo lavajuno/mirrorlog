@@ -42,11 +42,6 @@ public class YamlValue extends YamlElement {
      */
     public double toDouble() throws NumberFormatException { return Double.parseDouble(STR_VALUE); }
 
-    /**
-     * @param indent (Ignored) Indent to print with
-     * @param list (Ignored) Whether to print as part of a list
-     * @return This YamlValue as a String
-     */
     protected String toString(int indent, boolean list) {
         if(!list) { return STR_VALUE; }
         StringBuilder sb = new StringBuilder();
