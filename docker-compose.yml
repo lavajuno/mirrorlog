@@ -2,9 +2,14 @@ services:
   logserver:
     build: .
     container_name: mirrorlog
+    restart: unless-stopped
     ports:
-      - "4001:4357"
+      - "4001:4001"
     volumes:
-      - type: bind
-        source: ./logs
-        target: /mirrorlog/logs
+      - ./logs:/mirrorlog/logs
+      - ./config:/mirrorlog/config
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 500M

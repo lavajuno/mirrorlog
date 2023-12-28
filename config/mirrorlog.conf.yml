@@ -38,11 +38,9 @@ server:
   threads: 32
 
   # Which port should the server listen on? (integer)
-  # This can be overridden by passing a different port
-  # as an argument when starting the software.
   # -- Example --
   # port: 1234
-  port: 4357
+  port: 4001
 
   # How long should the server wait before disconnecting inactive clients? (integer)
   # This duration is measured in milliseconds. (15 min is 900000 ms)
