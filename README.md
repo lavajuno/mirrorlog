@@ -36,12 +36,12 @@ To start the server, just run `mirrorlog.jar`.
 
 The server uses a persistent TCP socket. No special action is needed when connecting or disconnecting.
 
-To submit a log event to the server, send it the string `@Component@SeverityMessage\r\n`
+To submit a log event to the server, send it the string `@Component@SeverityMessage\n`
 where Component is the name of the component logging the message, Severity is a number from 0 to 3,
 and Message is the messaged to be logged. For example, the component "MyComponent" logging
 a message with severity 0 (INFO) would send the following:
 
-`@MyComponent@0This is an example log event.\r\n`
+`@MyComponent@0This is an example log event.\n`
 
 This will log an event with severity 0 (Info), which looks like this:
 
@@ -52,18 +52,19 @@ WARN, ERROR, or FATAL respectively.
 
 Examples:
 
-`@MyComponent@0My Event\r\n` -> `2023-10-16 10:30:05 [ INFO ]  MyComponent     : My Event`
+`@MyComponent@0My Event\n` -> `2023-10-16 10:30:05 [ INFO ]  MyComponent     : My Event`
 
-`@MyComponent@1My Event\r\n` -> `2023-10-16 10:30:06 [ WARN ]  MyComponent     : My Event`
+`@MyComponent@1My Event\n` -> `2023-10-16 10:30:06 [ WARN ]  MyComponent     : My Event`
 
-`@MyComponent@2My Event\r\n` -> `2023-10-16 10:30:07 [ ERROR ] MyComponent     : My Event`
+`@MyComponent@2My Event\n` -> `2023-10-16 10:30:07 [ ERROR ] MyComponent     : My Event`
 
-`@MyComponent@3My Event\r\n` -> `2023-10-16 10:30:08 [ FATAL ] MyComponent     : My Event`
+`@MyComponent@3My Event\n` -> `2023-10-16 10:30:08 [ FATAL ] MyComponent     : My Event`
 
 When you log an event to the server, it will echo your input to acknowledge that it has received it.
 Incoming events are queued, so you should receive a response from the server quickly, even if it is under load.
 
-Logs will look best when component names are shorter than the length that they are specified to be padded to in the configuration file. A properly configured log with good component names will look like the following:
+Logs will look best when component names are shorter than the length that they are specified to be padded to in the 
+configuration file. A properly configured log with good component names will look like the following:
 
 ```
 2023-10-16 10:30:05 [ INFO ]  Website        : Opening connection to "127.0.0.1".

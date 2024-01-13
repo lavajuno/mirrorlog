@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Scanner;
 
 import org.lavajuno.mirrorlog.config.ApplicationConfig;
 import org.lavajuno.mirrorlog.io.OutputController;
@@ -50,52 +51,25 @@ public class ServerThread extends Thread {
                     "Client at " + client_address + " connected."
             );
             socket.setSoTimeout(application_config.getTimeout());
-            BufferedInputStream inFromClient = new BufferedInputStream(socket.getInputStream());
-            BufferedOutputStream outToClient = new BufferedOutputStream(socket.getOutputStream());
-            byte[] line_buf = new byte[LogMap.INPUT_BUFFER_SIZE];
-            int line_index = 0;
-            // Read the first byte from the stream
-            int next = inFromClient.read();
+            Scanner inFromClient = new Scanner(socket.getInputStream());
+            PrintWriter outToClient = new PrintWriter(socket.getOutputStream());
             // Loop while the stream is open
-            while(next != -1) {
-                // If we see a carriage return
-                if(next == 13) {
-                    // Read the next byte immediately
-                    next = inFromClient.read();
-                    // If the next byte is a line feed
-                    if(next == 10) {
-                        // Decode the portion of buffer that we have written
-                        String line_str = new String(
-                                Arrays.copyOf(line_buf, line_index),
-                                StandardCharsets.UTF_8
-                        );
-                        if(line_str.matches("^@[0-9A-Za-z_-]{1,128}@[0-3].*$")) {
-                            String[] fragments = line_str.split("@", 3);
-                            // Submit log event and respond
-                            outputController.submitEvent(
-                                    fragments[1],
-                                    Integer.parseInt(fragments[2].substring(0, 1)),
-                                    fragments[2].substring(1)
-                            );
-                            outToClient.write((line_str + "\r\n").getBytes(StandardCharsets.UTF_8));
-                            outToClient.flush();
-                        } else {
-                            outToClient.write("BAD SYNTAX\r\n".getBytes(StandardCharsets.UTF_8));
-                            outToClient.flush();
-                        }
-                        // Reset the line index when we're done
-                        line_index = 0;
-                    }
+            while(inFromClient.hasNext()) {
+                String line = inFromClient.nextLine();
+                if(line.matches("^@[0-9A-Za-z_-]{1,128}@[0-3].*$")) {
+                    String[] fragments = line.split("@", 3);
+                    // Submit log event and respond
+                    outputController.submitEvent(
+                            fragments[1],
+                            Integer.parseInt(fragments[2].substring(0, 1)),
+                            fragments[2].substring(1)
+                    );
+                    outToClient.println(line);
+                    outToClient.flush();
                 } else {
-                    // Append current byte to buffer and increment index
-                    line_buf[line_index] = (byte) next;
-                    line_index++;
-                    if(line_index >= LogMap.INPUT_BUFFER_SIZE) {
-                        throw new IOException("Bad request (Too long).");
-                    }
+                    outToClient.println("BAD SYNTAX");
+                    outToClient.flush();
                 }
-                // Read next byte
-                next = inFromClient.read();
             }
             socket.close();
             outputController.submitEvent(
