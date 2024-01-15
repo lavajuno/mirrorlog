@@ -6,6 +6,7 @@ import org.lavajuno.mirrorlog.main.LogMap;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.text.ParseException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -39,7 +40,7 @@ public class ServerController extends Thread {
      * Instantiates a ServerController.
      * @throws IOException if the socket cannot be created
      */
-    public ServerController() throws IOException {
+    public ServerController() throws IOException, ParseException {
         application_config = new ApplicationConfig(LogMap.CONFIG_FILE_PATH);
         output_controller = new OutputController(application_config);
         threadPool = Executors.newFixedThreadPool(application_config.getThreads());

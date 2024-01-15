@@ -1,6 +1,8 @@
 package org.lavajuno.mirrorlog.main;
 
 import java.io.IOException;
+import java.text.ParseException;
+
 import org.lavajuno.mirrorlog.server.ServerController;
 
 /**
@@ -12,15 +14,10 @@ public class MirrorLogApplication {
      * Starts MirrorLog.
      * @param args Unused
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ParseException {
         ServerController server_controller;
         System.out.println("Starting MirrorLog server...");
-        try {
-            server_controller = new ServerController();
-            server_controller.start();
-        } catch(IOException e) {
-            System.err.println("Failed to start server! (IOException)");
-            System.err.println(e.getMessage());
-        }
+        server_controller = new ServerController();
+        server_controller.start();
     }
 }

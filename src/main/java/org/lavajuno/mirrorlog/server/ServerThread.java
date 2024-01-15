@@ -5,13 +5,10 @@ import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import org.lavajuno.mirrorlog.config.ApplicationConfig;
 import org.lavajuno.mirrorlog.io.OutputController;
-import org.lavajuno.mirrorlog.main.LogMap;
 
 /**
  * ServerThread serves a single client and queues events
