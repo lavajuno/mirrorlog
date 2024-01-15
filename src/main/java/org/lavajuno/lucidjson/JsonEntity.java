@@ -209,13 +209,22 @@ public abstract class JsonEntity {
     /**
      * Serializes this JsonEntity to a String with newlines and indentation.
      * @param indent Indent of this JsonEntity
-     * @return This JsonEntity as a string.
+     * @return This JsonEntity as a String
      */
     protected abstract String toString(int indent);
 
     /**
+     * Serializes this JsonEntity to a String with optional formatting.
+     * @param pretty Whether to use newlines and indents in the output
+     * @return This JsonEntity as a String
+     */
+    public String toString(boolean pretty) {
+        return pretty ? this.toString(0) : this.toString();
+    }
+
+    /**
      * Serializes this JsonEntity to a String without any formatting.
-     * @return This JsonEntity as a string.
+     * @return This JsonEntity as a String
      */
     @Override
     public abstract String toString();

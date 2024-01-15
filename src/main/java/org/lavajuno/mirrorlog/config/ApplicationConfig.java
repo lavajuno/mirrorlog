@@ -34,7 +34,7 @@ public class ApplicationConfig {
      */
     public ApplicationConfig(String config_file_path) throws IOException, ParseException {
         /* Parse configuration file */
-        final JsonObject config_root = Json.readFile(config_file_path);
+        final JsonObject config_root = JsonObject.fromFile(config_file_path);
 
         /* Get configuration revision */
         final JsonNumber config_revision = (JsonNumber) config_root.get("revision");

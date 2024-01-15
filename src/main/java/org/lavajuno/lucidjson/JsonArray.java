@@ -1,6 +1,10 @@
 package org.lavajuno.lucidjson;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.ParseException;
+import java.util.List;
+import java.util.Scanner;
 import java.util.Vector;
 
 /**
@@ -29,6 +33,48 @@ public class JsonArray extends JsonEntity {
      */
     protected JsonArray(String text) throws ParseException {
         values = parseValues(text.strip());
+    }
+
+    /**
+     * Deserializes a JSON array from a String.
+     * @param text Input string
+     * @return Deserialized JSON array
+     * @throws ParseException if parsing fails;
+     */
+    public static JsonArray from(String text) throws ParseException {
+        String line = text.replace("\n", "");
+        if(!line.matches(ARRAY_RGX)) {
+            printError(line, "Expected an array.");
+            throw new ParseException("Expected an array.", 0);
+        }
+        return new JsonArray(line);
+    }
+
+    /**
+     * Deserializes a JSON array from a list of lines (Strings).
+     * @param lines Input lines
+     * @return Deserialized JSON array
+     * @throws ParseException If parsing fails
+     */
+    public static JsonArray from(List<String> lines) throws ParseException {
+        StringBuilder sb = new StringBuilder();
+        for(String i : lines) { sb.append(i); }
+        return from(sb.toString());
+    }
+
+    /**
+     * Deserializes a JSON array from a file.
+     * @param file_path Path to the input file
+     * @return Deserialized JSON array
+     * @throws FileNotFoundException If the file could not be read
+     * @throws ParseException If parsing fails
+     */
+    public static JsonArray fromFile(String file_path) throws FileNotFoundException, ParseException {
+        Scanner file = new Scanner(new FileInputStream(file_path));
+        StringBuilder lines = new StringBuilder();
+        while(file.hasNextLine()) { lines.append(file.nextLine()); }
+        file.close();
+        return from(lines.toString());
     }
 
     /**

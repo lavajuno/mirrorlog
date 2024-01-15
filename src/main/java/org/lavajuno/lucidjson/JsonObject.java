@@ -2,15 +2,15 @@ package org.lavajuno.lucidjson;
 
 import org.lavajuno.lucidjson.util.Pair;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Represents a JSON object.
  * Provides functionality for accessing and modifying its values.
+ * LucidJSON v0.0.1 (Experimental)
  */
 @SuppressWarnings("unused")
 public class JsonObject extends JsonEntity {
@@ -34,6 +34,48 @@ public class JsonObject extends JsonEntity {
      */
     protected JsonObject(String text) throws ParseException {
         values = parseValues(text.strip());
+    }
+
+    /**
+     * Deserializes a JSON object from a String.
+     * @param text Input string
+     * @return Deserialized JSON object
+     * @throws ParseException if parsing fails;
+     */
+    public static JsonObject from(String text) throws ParseException {
+        String line = text.replace("\n", "");
+        if(!line.matches(OBJECT_RGX)) {
+            printError(line, "Expected an object.");
+            throw new ParseException("Expected an object.", 0);
+        }
+        return new JsonObject(line);
+    }
+
+    /**
+     * Deserializes a JSON object from a list of lines (Strings).
+     * @param lines Input lines
+     * @return Deserialized JSON object
+     * @throws ParseException If parsing fails
+     */
+    public static JsonObject from(List<String> lines) throws ParseException {
+        StringBuilder sb = new StringBuilder();
+        for(String i : lines) { sb.append(i); }
+        return from(sb.toString());
+    }
+
+    /**
+     * Deserializes a JSON object from a file.
+     * @param file_path Path to the input file
+     * @return Deserialized JSON object
+     * @throws FileNotFoundException If the file could not be read
+     * @throws ParseException If parsing fails
+     */
+    public static JsonObject fromFile(String file_path) throws FileNotFoundException, ParseException {
+        Scanner file = new Scanner(new FileInputStream(file_path));
+        StringBuilder lines = new StringBuilder();
+        while(file.hasNextLine()) { lines.append(file.nextLine()); }
+        file.close();
+        return from(lines.toString());
     }
 
     /**
