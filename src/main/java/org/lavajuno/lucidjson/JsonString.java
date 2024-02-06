@@ -1,5 +1,9 @@
 package org.lavajuno.lucidjson;
 
+import org.lavajuno.lucidjson.util.Index;
+
+import java.text.ParseException;
+
 /**
  * Represents a JSON string value.
  * Provides functionality for getting and setting the value.
@@ -12,12 +16,24 @@ public class JsonString extends JsonEntity {
      * Constructs a JsonValue by parsing the input.
      * @param text JSON string to parse
      */
-    public JsonString(String text) {
-        if(text.charAt(0) == '"' && text.charAt(text.length() - 1) == '"') {
-            value = text.substring(1, text.length() - 1);
-        } else {
-            value = text;
+    public JsonString(String text, Index i) throws ParseException {
+        skipSpace(text, i);
+        if(text.charAt(i.pos) != '"') {
+            throwParseError(text, i.pos, "Parsing string, expected a '\"'.");
         }
+        i.pos++;
+        int begin = i.pos;
+        while(i.pos < text.length()) {
+            if(text.charAt(i.pos) == '"' && text.charAt(i.pos - 1) != '\\') {
+                break;
+            }
+            i.pos++;
+        }
+        if(i.pos == text.length()) {
+            throwParseError(text, i.pos, "Parsing string, reached end of input.");
+        }
+        value = text.substring(begin, i.pos);
+        i.pos++;
     }
 
     /**

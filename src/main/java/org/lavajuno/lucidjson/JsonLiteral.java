@@ -1,5 +1,9 @@
 package org.lavajuno.lucidjson;
 
+import org.lavajuno.lucidjson.util.Index;
+
+import java.text.ParseException;
+
 /**
  * Represents a JSON literal value (true/false/null).
  * Provides functionality for getting and setting the value.
@@ -21,13 +25,21 @@ public class JsonLiteral extends JsonEntity {
 
     /**
      * Constructs a JsonLiteral by parsing the input.
+     * @param i Index of next character to parse
      * @param text JSON to parse
      */
-    protected JsonLiteral(String text) {
-        switch (text) {
-            case "null" -> value = null;
-            case "true" -> value = true;
-            case "false" -> value = false;
+    protected JsonLiteral(String text, Index i) throws ParseException {
+        if(text.startsWith("true", i.pos)) {
+            i.pos += 4;
+            value = true;
+        } else if(text.startsWith("false", i.pos)) {
+            i.pos += 5;
+            value = false;
+        } else if(text.startsWith("null", i.pos)) {
+            i.pos += 4;
+            value = null;
+        } else {
+            throwParseError(text, i.pos, "Parsing literal, unknown value");
         }
     }
 

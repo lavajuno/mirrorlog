@@ -1,5 +1,9 @@
 package org.lavajuno.lucidjson;
 
+import org.lavajuno.lucidjson.util.Index;
+
+import java.text.ParseException;
+
 /**
  * Represents a JSON number value.
  * Provides functionality for getting and setting the value as an int, long, float, or double.
@@ -34,10 +38,21 @@ public class JsonNumber extends JsonEntity {
 
     /**
      * Constructs a JsonNumber from the input.
-     * @param value JSON number
+     * @param text JSON number
+     * @param i Index of next character to parse
      */
-    protected JsonNumber(String value) {
-        this.value = value;
+    protected JsonNumber(String text, Index i) throws ParseException {
+        int begin = i.pos;
+        while(i.pos < text.length()) {
+            if(!isNumber(text.charAt(i.pos))) {
+                break;
+            }
+            i.pos++;
+        }
+        if(i.pos == text.length()) {
+            throwParseError(text, i.pos, "Parsing number, reached end of input.");
+        }
+        this.value = text.substring(begin, i.pos);
     }
 
     /**
@@ -91,6 +106,19 @@ public class JsonNumber extends JsonEntity {
      * @param value Double value of this JsonNumber
      */
     public void set(double value) { this.value = Double.toString(value); }
+
+    /**
+     * Returns true if the character is part of a valid JSON number
+     * @param c Character to check
+     * @return True if the character is part of a valid JSON number
+     */
+    private static boolean isNumber(char c) {
+        return switch(c) {
+            case '0', '1', '2', '3', '4', '5', '6',
+                    '7', '8', '9', '.', '-', 'e', 'E' -> true;
+            default -> false;
+        };
+    }
 
     @Override
     public String toString() { return value; }
