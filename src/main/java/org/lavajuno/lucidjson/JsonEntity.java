@@ -55,6 +55,7 @@ public abstract class JsonEntity {
     protected static Pair<String, JsonEntity> parsePair(String text, Index i) throws ParseException {
         while(text.charAt(i.pos) == ' ' || text.charAt(i.pos) == '\t') { i.pos++; }
         String key = (new JsonString(text, i)).getValue();
+        skipSpace(text, i);
         if(text.charAt(i.pos) != ':') {
             throwParseError(text, i.pos, "Parsing pair, expected a ':'.");
         }

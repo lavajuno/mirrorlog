@@ -171,11 +171,10 @@ public class JsonArray extends JsonEntity {
         String pad_elem = " ".repeat(indent + 4);
         String pad_close = " ".repeat(indent);
         sb.append("[\n");
-        for(int i = 0; i < values.size() - 1; i++) {
-            sb.append(pad_elem).append(values.get(i).toString(indent + 4)).append(",\n");
-        }
-        if(!values.isEmpty()) {
-            sb.append(pad_elem).append(values.get(values.size() - 1)).append("\n");
+        for(int i = 0; i < values.size(); i++) {
+            sb.append(pad_elem).append(values.get(i).toString(indent + 4));
+            if(i < values.size() - 1) { sb.append(","); }
+            sb.append("\n");
         }
         sb.append(pad_close).append("]");
         return sb.toString();
