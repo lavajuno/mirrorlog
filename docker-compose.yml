@@ -1,15 +1,21 @@
 services:
-  logserver:
+  app:
     build: .
     container_name: mirrorlog
     restart: unless-stopped
-    ports:
-      - "4001:4001"
+    expose:
+      - 4001
     volumes:
-      - ./logs:/mirrorlog/logs
-      - ./config:/mirrorlog/config
+      - ./logs:/mirror/mirrorlog/logs
+      - ./config:/mirror/mirrorlog/config
+    networks:
+      - mirror
     deploy:
       resources:
         limits:
           cpus: '2.0'
           memory: 500M
+
+networks:
+  mirror:
+    external: true
