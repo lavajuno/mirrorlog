@@ -1,8 +1,8 @@
 package org.lavajuno.mirrorlog.server;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Scanner;
@@ -68,6 +68,7 @@ public class ServerThread extends Thread {
                     outToClient.flush();
                 }
             }
+            inFromClient.close();
             socket.close();
             outputController.submitEvent(
                     "Log Server",
