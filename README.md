@@ -6,7 +6,7 @@ A customizable, multithreaded log server that provides a lot of functionality in
 
 [Releases](https://github.com/lavajuno/mirrorlog/releases)
 
-[Documentation](docs/jdoc/index.html)
+[Documentation](https://lavajuno.github.io/mirrorlog/docs/index.html)
 
 
 ## Features
