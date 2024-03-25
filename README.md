@@ -19,7 +19,7 @@ A customizable, multithreaded log server that provides a lot of functionality in
  - Managed output queue for smaller response delays
 
 ## Configuration
-MirrorLog's configuration is stored in the file "mirrorlog.conf.yml"
+MirrorLog's configuration is stored in the file "mirrorlog.conf.json"
 
 You can customize the following:
  - The size of the server thread pool
